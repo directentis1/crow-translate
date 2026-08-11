@@ -987,6 +987,8 @@ void MainWindow::loadAppSettings()
     m_translator->setEngineUrl(QOnlineTranslator::LibreTranslate, settings.engineUrl(QOnlineTranslator::LibreTranslate));
     m_translator->setEngineApiKey(QOnlineTranslator::LibreTranslate, settings.engineApiKey(QOnlineTranslator::LibreTranslate));
     m_translator->setEngineUrl(QOnlineTranslator::Lingva, settings.engineUrl(QOnlineTranslator::Lingva));
+    m_translator->setEngineUrl(QOnlineTranslator::DeepLX, settings.engineUrl(QOnlineTranslator::DeepLX));
+    m_translator->setEngineApiKey(QOnlineTranslator::DeepLX, settings.engineApiKey(QOnlineTranslator::DeepLX));
 
     // OCR settings
     if (const QByteArray languages = settings.ocrLanguagesString(), path = settings.ocrLanguagesPath(); !m_ocr->init(languages, path, settings.tesseractParameters())) {

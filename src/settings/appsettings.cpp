@@ -525,6 +525,8 @@ QString AppSettings::engineUrl(QOnlineTranslator::Engine engine) const
         return m_settings->value(QStringLiteral("Translation/LibreTranslateUrl"), defaultEngineUrl(engine)).toString();
     case QOnlineTranslator::Lingva:
         return m_settings->value(QStringLiteral("Translation/LingvaUrl"), defaultEngineUrl(engine)).toString();
+    case QOnlineTranslator::DeepLX:
+        return m_settings->value(QStringLiteral("Translation/DeepLXUrl"), defaultEngineUrl(engine)).toString();
     default:
         Q_UNREACHABLE();
     }
@@ -539,6 +541,9 @@ void AppSettings::setEngineUrl(QOnlineTranslator::Engine engine, const QString &
     case QOnlineTranslator::Lingva:
         m_settings->setValue(QStringLiteral("Translation/LingvaUrl"), url);
         break;
+    case QOnlineTranslator::DeepLX:
+        m_settings->setValue(QStringLiteral("Translation/DeepLXUrl"), url);
+        break;
     default:
         Q_UNREACHABLE();
     }
@@ -551,6 +556,8 @@ QString AppSettings::defaultEngineUrl(QOnlineTranslator::Engine engine)
         return QStringLiteral("https://translate.argosopentech.com");
     case QOnlineTranslator::Lingva:
         return QStringLiteral("https://lingva.garudalinux.org");
+    case QOnlineTranslator::DeepLX:
+        return QStringLiteral("http://localhost:1188");
     default:
         Q_UNREACHABLE();
     }
@@ -561,6 +568,8 @@ QByteArray AppSettings::engineApiKey(QOnlineTranslator::Engine engine) const
     switch (engine) {
     case QOnlineTranslator::LibreTranslate:
         return m_settings->value(QStringLiteral("Translation/LibreTranslateApiKey"), defaultEngineApiKey(engine)).toByteArray();
+    case QOnlineTranslator::DeepLX:
+        return m_settings->value(QStringLiteral("Translation/DeepLXApiKey"), defaultEngineApiKey(engine)).toByteArray();
     default:
         Q_UNREACHABLE();
     }
@@ -572,6 +581,9 @@ void AppSettings::setEngineApiKey(QOnlineTranslator::Engine engine, const QByteA
     case QOnlineTranslator::LibreTranslate:
         m_settings->setValue(QStringLiteral("Translation/LibreTranslateApiKey"), apiKey);
         break;
+    case QOnlineTranslator::DeepLX:
+        m_settings->setValue(QStringLiteral("Translation/DeepLXApiKey"), apiKey);
+        break;
     default:
         Q_UNREACHABLE();
     }
@@ -581,6 +593,8 @@ QByteArray AppSettings::defaultEngineApiKey(QOnlineTranslator::Engine engine)
 {
     switch (engine) {
     case QOnlineTranslator::LibreTranslate:
+        return {};
+    case QOnlineTranslator::DeepLX:
         return {};
     default:
         Q_UNREACHABLE();
@@ -594,6 +608,7 @@ QOnlineTts::Voice AppSettings::voice(QOnlineTranslator::Engine engine) const
     case QOnlineTranslator::Bing:
     case QOnlineTranslator::LibreTranslate:
     case QOnlineTranslator::Lingva:
+    case QOnlineTranslator::DeepLX:
         return QOnlineTts::NoVoice;
     case QOnlineTranslator::Yandex:
         return m_settings->value(QStringLiteral("TTS/YandexVoice"), defaultVoice(engine)).value<QOnlineTts::Voice>();
@@ -621,6 +636,7 @@ QOnlineTts::Voice AppSettings::defaultVoice(QOnlineTranslator::Engine engine)
     case QOnlineTranslator::Bing:
     case QOnlineTranslator::LibreTranslate:
     case QOnlineTranslator::Lingva:
+    case QOnlineTranslator::DeepLX:
         return QOnlineTts::NoVoice;
     case QOnlineTranslator::Yandex:
         return QOnlineTts::Zahar;
@@ -636,6 +652,7 @@ QOnlineTts::Emotion AppSettings::emotion(QOnlineTranslator::Engine engine) const
     case QOnlineTranslator::Bing:
     case QOnlineTranslator::LibreTranslate:
     case QOnlineTranslator::Lingva:
+    case QOnlineTranslator::DeepLX:
         return QOnlineTts::NoEmotion;
     case QOnlineTranslator::Yandex:
         return m_settings->value(QStringLiteral("TTS/YandexEmotion"), defaultEmotion(engine)).value<QOnlineTts::Emotion>();
@@ -663,6 +680,7 @@ QOnlineTts::Emotion AppSettings::defaultEmotion(QOnlineTranslator::Engine engine
     case QOnlineTranslator::Bing:
     case QOnlineTranslator::LibreTranslate:
     case QOnlineTranslator::Lingva:
+    case QOnlineTranslator::DeepLX:
         return QOnlineTts::NoEmotion;
     case QOnlineTranslator::Yandex:
         return QOnlineTts::Neutral;
@@ -685,6 +703,7 @@ QMap<QOnlineTranslator::Language, QLocale::Country> AppSettings::regions(QOnline
     case QOnlineTranslator::Yandex:
     case QOnlineTranslator::LibreTranslate:
     case QOnlineTranslator::Lingva:
+    case QOnlineTranslator::DeepLX:
         return {};
     default:
         Q_UNREACHABLE();
@@ -715,6 +734,7 @@ QMap<QOnlineTranslator::Language, QLocale::Country> AppSettings::defaultRegions(
     case QOnlineTranslator::Yandex:
     case QOnlineTranslator::LibreTranslate:
     case QOnlineTranslator::Lingva:
+    case QOnlineTranslator::DeepLX:
         return {};
     default:
         Q_UNREACHABLE();

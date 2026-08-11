@@ -254,6 +254,8 @@ void SettingsDialog::accept()
     settings.setEngineUrl(QOnlineTranslator::LibreTranslate, ui->libreTranslateUrlComboBox->currentText());
     settings.setEngineApiKey(QOnlineTranslator::LibreTranslate, ui->libreTranslateApiKeyTextEdit->text().toUtf8());
     settings.setEngineUrl(QOnlineTranslator::Lingva, ui->lingvaUrlComboBox->currentText());
+    settings.setEngineUrl(QOnlineTranslator::DeepLX, ui->deeplxUrlComboBox->currentText());
+    settings.setEngineApiKey(QOnlineTranslator::DeepLX, ui->deeplxApiKeyTextEdit->text().toUtf8());
 
     // OCR
     settings.setConvertLineBreaks(ui->convertLineBreaksCheckBox->isChecked());
@@ -565,6 +567,8 @@ void SettingsDialog::restoreDefaults()
     ui->libreTranslateUrlComboBox->setCurrentText(AppSettings::defaultEngineUrl(QOnlineTranslator::LibreTranslate));
     ui->libreTranslateApiKeyTextEdit->setText(AppSettings::defaultEngineApiKey(QOnlineTranslator::LibreTranslate));
     ui->lingvaUrlComboBox->setCurrentText(AppSettings::defaultEngineUrl(QOnlineTranslator::Lingva));
+    ui->deeplxUrlComboBox->setCurrentText(AppSettings::defaultEngineUrl(QOnlineTranslator::DeepLX));
+    ui->deeplxApiKeyTextEdit->setText(AppSettings::defaultEngineApiKey(QOnlineTranslator::DeepLX));
 
     // OCR
     ui->convertLineBreaksCheckBox->setChecked(AppSettings::defaultConvertLineBreaks());
@@ -676,6 +680,8 @@ void SettingsDialog::loadSettings()
     ui->libreTranslateUrlComboBox->setCurrentText(settings.engineUrl(QOnlineTranslator::LibreTranslate));
     ui->libreTranslateApiKeyTextEdit->setText(settings.engineApiKey(QOnlineTranslator::LibreTranslate));
     ui->lingvaUrlComboBox->setCurrentText(settings.engineUrl(QOnlineTranslator::Lingva));
+    ui->deeplxUrlComboBox->setCurrentText(settings.engineUrl(QOnlineTranslator::DeepLX));
+    ui->deeplxApiKeyTextEdit->setText(settings.engineApiKey(QOnlineTranslator::DeepLX));
 
     // OCR
     ui->convertLineBreaksCheckBox->setChecked(settings.isConvertLineBreaks());

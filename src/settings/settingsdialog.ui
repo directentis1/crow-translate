@@ -870,6 +870,66 @@
              </widget>
             </item>
             <item>
+             <widget class="QGroupBox" name="deeplxGroupBox">
+              <property name="title">
+               <string notr="true">DeepLX</string>
+              </property>
+              <layout class="QFormLayout" name="formLayout_12">
+               <item row="0" column="0">
+                <widget class="QLabel" name="deeplxUrlLabel">
+                 <property name="text">
+                  <string notr="true">URL:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="deeplxUrlComboBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;DeepLX (DLX) instance URL&lt;/p&gt;&lt;p&gt;DeepLX is self-hosted, so point this at your own running instance, e.g. http://localhost:1188&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="editable">
+                  <bool>true</bool>
+                 </property>
+                 <property name="currentText">
+                  <string notr="true">http://localhost:1188</string>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string notr="true">http://localhost:1188</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="deeplxApiKeyLabel">
+                 <property name="text">
+                  <string>API key:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="deeplxApiKeyTextEdit">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Bearer token for your DeepLX instance&lt;/p&gt;&lt;p&gt;Only required if your instance was started with the -token option, so this field can usually be left empty&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string notr="true"/>
+                 </property>
+                 <property name="placeholderText">
+                  <string notr="true">optional</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
              <spacer name="translationPageSpacer">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
