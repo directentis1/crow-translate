@@ -100,7 +100,7 @@ jobs:
           cmake --build build --parallel 2 --target install
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: crow-translate-${{ matrix.os }}
           path: install/**
