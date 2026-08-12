@@ -28,25 +28,25 @@ jobs:
     name: Release
     strategy:
       matrix:
-        os: [ubuntu-22.04, windows-2019]
-        arch: [amd64, aarch64, armv7]
+        os: [ubuntu-22.04]
+        arch: [amd64]
         include:
           - os: ubuntu-22.04
             extra-cmake-arguments: >-
               -D CPACK_GENERATOR="DEB;RPM;External"
-          - os: windows-2019
-            extra-cmake-arguments: >-
-              -D CMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
-              -D VCPKG_TARGET_TRIPLET=x64-windows
-              -D VCPKG_INSTALL_OPTIONS=--clean-after-build
-              -D WITH_PORTABLE_MODE=ON
-              -D CPACK_GENERATOR="NSIS;7Z"
-              -D X_VCPKG_APPLOCAL_DEPS_INSTALL=ON
-        exclude:
-          - os: windows-2019
-            arch: aarch64
-          - os: windows-2019
-            arch: armv7
+          # - os: windows-2019
+          #   extra-cmake-arguments: >-
+          #     -D CMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
+          #     -D VCPKG_TARGET_TRIPLET=x64-windows
+          #     -D VCPKG_INSTALL_OPTIONS=--clean-after-build
+          #     -D WITH_PORTABLE_MODE=ON
+          #     -D CPACK_GENERATOR="NSIS;7Z"
+          #     -D X_VCPKG_APPLOCAL_DEPS_INSTALL=ON
+        # exclude:
+        #   - os: windows-2019
+        #     arch: aarch64
+        #   - os: windows-2019
+        #     arch: armv7
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -69,23 +69,23 @@ jobs:
           plugins: qt gstreamer
 
       # To set the application icon
-      - name: Install icoutils
-        if: runner.os == 'Windows'
-        run: |
-          $version = "0.32.3"
-          Invoke-WebRequest -Uri "https://sourceforge.net/projects/unix-utils/files/icoutils/icoutils-$version-x86_64.zip" -OutFile icoutils.zip -UserAgent "NativeHost" -SkipCertificateCheck
-          7z x icoutils.zip
-          echo "${{ github.workspace }}/icoutils-$version-x86_64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      # - name: Install icoutils
+      #   if: runner.os == 'Windows'
+      #   run: |
+      #     $version = "0.32.3"
+      #     Invoke-WebRequest -Uri "https://sourceforge.net/projects/unix-utils/files/icoutils/icoutils-$version-x86_64.zip" -OutFile icoutils.zip -UserAgent "NativeHost" -SkipCertificateCheck
+      #     7z x icoutils.zip
+      #     echo "${{ github.workspace }}/icoutils-$version-x86_64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Install vcpkg
-        uses: lukka/run-vcpkg@v11.4
-        if: runner.os == 'Windows'
-        with:
-          vcpkgJsonGlob: vcpkg.json
+      # - name: Install vcpkg
+      #   uses: lukka/run-vcpkg@v11.4
+      #   if: runner.os == 'Windows'
+      #   with:
+      #     vcpkgJsonGlob: vcpkg.json
 
-      - name: Setup MSVC
-        if: runner.os == 'Windows'
-        uses: ilammy/msvc-dev-cmd@v1
+      # - name: Setup MSVC
+      #   if: runner.os == 'Windows'
+      #   uses: ilammy/msvc-dev-cmd@v1
 
       - name: Build
         if: matrix.arch == 'amd64'
