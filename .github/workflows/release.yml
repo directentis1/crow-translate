@@ -1,7 +1,8 @@
 name: Release
 on:
-  release:
-    types: [created]
+  workflow_dispatch:
+  # release:
+  #   types: [created]
 jobs:
   pack:
     name: Pack source tarball
@@ -116,8 +117,20 @@ jobs:
             cmake -S /repo -B /repo/build -G Ninja -D CMAKE_BUILD_TYPE=Release ${{ matrix.extra-cmake-arguments }}
             cmake --build /repo/build --target package --parallel 2
 
-      - name: Upload
-        uses: AButler/upload-release-assets@v2.0
-        with:
-          files: build/{crow-translate*.exe,*.AppImage,*.AppImage.zsync,*.deb,*.rpm,*.7z}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Upload
+      #   uses: AButler/upload-release-assets@v2.0
+      #   with:
+      #     files: build/{crow-translate*.exe,*.AppImage,*.AppImage.zsync,*.deb,*.rpm,*.7z}
+      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload binaries to Latest Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="latest"
+          
+          # Check if the 'latest' release exists, if not, create it automatically
+          gh release view "$TAG" || gh release create "$TAG" --title "Latest Continuous Release" --notes "Automated rolling release builds containing the latest changes."
+
+          # Find and upload files matching your build outputs, overwriting older ones
+          # (Optional) Delete old assets first if you want to keep only the newest binaries
+          gh release upload "$TAG" build/*.AppImage build/*.AppImage.zsync build/*.deb build/*.rpm build/*.7z build/*.exe --clobber
