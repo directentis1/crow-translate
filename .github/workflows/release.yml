@@ -134,7 +134,6 @@ jobs:
             build/*.rpm
             build/*.7z
             build/*.exe
-           cabeça: latest
           prerelease: true
           # This ensures old assets with the same filename are overwritten on every manual run
           fail_on_unmatched_files: false
