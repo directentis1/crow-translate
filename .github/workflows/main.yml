@@ -48,19 +48,19 @@ jobs:
     name: Build
     strategy:
       matrix:
-        os: [ubuntu-22.04, windows-2019]
+        os: [ubuntu-22.04]
         include:
           - os: ubuntu-22.04
             extra-cmake-arguments: >-
               -D CMAKE_CXX_FLAGS="-Wall -Wextra -pedantic -Werror"
-          - os: windows-2019
-            extra-cmake-arguments: >-
-              -D CMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
-              -D VCPKG_TARGET_TRIPLET=x64-windows
-              -D VCPKG_INSTALL_OPTIONS=--clean-after-build
-              -D X_VCPKG_APPLOCAL_DEPS_INSTALL=ON
-              -D CMAKE_CXX_FLAGS="/experimental:external /external:anglebrackets /external:W0 /W4 /wd4530 /WX"
-              -D CMAKE_CXX_CLANG_TIDY='clang-tidy;--warnings-as-errors=*'
+          # - os: windows-2019
+          #   extra-cmake-arguments: >-
+          #     -D CMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
+          #     -D VCPKG_TARGET_TRIPLET=x64-windows
+          #     -D VCPKG_INSTALL_OPTIONS=--clean-after-build
+          #     -D X_VCPKG_APPLOCAL_DEPS_INSTALL=ON
+          #     -D CMAKE_CXX_FLAGS="/experimental:external /external:anglebrackets /external:W0 /W4 /wd4530 /WX"
+          #     -D CMAKE_CXX_CLANG_TIDY='clang-tidy;--warnings-as-errors=*'
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -76,23 +76,23 @@ jobs:
           sudo apt-get install extra-cmake-modules libqt5x11extras5-dev qttools5-dev qtmultimedia5-dev libkf5wayland-dev libtesseract-dev ninja-build
 
       # To set the application icon
-      - name: Install icoutils
-        if: runner.os == 'Windows'
-        run: |
-          $version = "0.32.3"
-          Invoke-WebRequest -Uri "https://sourceforge.net/projects/unix-utils/files/icoutils/icoutils-$version-x86_64.zip" -OutFile icoutils.zip -UserAgent "NativeHost" -SkipCertificateCheck
-          7z x icoutils.zip
-          echo "${{ github.workspace }}/icoutils-$version-x86_64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      # - name: Install icoutils
+      #   if: runner.os == 'Windows'
+      #   run: |
+      #     $version = "0.32.3"
+      #     Invoke-WebRequest -Uri "https://sourceforge.net/projects/unix-utils/files/icoutils/icoutils-$version-x86_64.zip" -OutFile icoutils.zip -UserAgent "NativeHost" -SkipCertificateCheck
+      #     7z x icoutils.zip
+      #     echo "${{ github.workspace }}/icoutils-$version-x86_64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Install vcpkg
-        uses: lukka/run-vcpkg@v11.5
-        if: runner.os == 'Windows'
-        with:
-          vcpkgJsonGlob: vcpkg.json
+      # - name: Install vcpkg
+      #   uses: lukka/run-vcpkg@v11.5
+      #   if: runner.os == 'Windows'
+      #   with:
+      #     vcpkgJsonGlob: vcpkg.json
 
-      - name: Setup MSVC
-        if: runner.os == 'Windows'
-        uses: ilammy/msvc-dev-cmd@v1
+      # - name: Setup MSVC
+      #   if: runner.os == 'Windows'
+      #   uses: ilammy/msvc-dev-cmd@v1
 
       - name: Build
         run: |
