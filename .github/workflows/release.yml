@@ -123,14 +123,18 @@ jobs:
       #     files: build/{crow-translate*.exe,*.AppImage,*.AppImage.zsync,*.deb,*.rpm,*.7z}
       #     repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload binaries to Latest Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG="latest"
-          
-          # Check if the 'latest' release exists, if not, create it automatically
-          gh release view "$TAG" || gh release create "$TAG" --title "Latest Continuous Release" --notes "Automated rolling release builds containing the latest changes."
-
-          # Find and upload files matching your build outputs, overwriting older ones
-          # (Optional) Delete old assets first if you want to keep only the newest binaries
-          gh release upload "$TAG" build/*.AppImage build/*.AppImage.zsync build/*.deb build/*.rpm build/*.7z build/*.exe --clobber
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Latest Continuous Release"
+          files: |
+            build/*.AppImage
+            build/*.AppImage.zsync
+            build/*.deb
+            build/*.rpm
+            build/*.7z
+            build/*.exe
+           cabeça: latest
+          prerelease: true
+          # This ensures old assets with the same filename are overwritten on every manual run
+          fail_on_unmatched_files: false
