@@ -247,6 +247,15 @@
              <normaloff>:/icons/engines/deeplx.svg</normaloff>:/icons/engines/deeplx.svg</iconset>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string notr="true">DeepLX (free)</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../data/icons/engines/engines.qrc">
+             <normaloff>:/icons/engines/deeplx.svg</normaloff>:/icons/engines/deeplx.svg</iconset>
+           </property>
+          </item>
          </widget>
         </item>
         <item>
