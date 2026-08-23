@@ -142,8 +142,10 @@ void Cli::process(const QCoreApplication &app)
         m_engine = QOnlineTranslator::DeepLX;
         m_translator->setEngineUrl(QOnlineTranslator::Engine::DeepLX, AppSettings().engineUrl(QOnlineTranslator::Engine::DeepLX));
         m_translator->setEngineApiKey(QOnlineTranslator::Engine::DeepLX, AppSettings().engineApiKey(QOnlineTranslator::Engine::DeepLX));
+        m_translator->setLanguageRegions(AppSettings().regions(QOnlineTranslator::Engine::DeepLX));
     } else if (parser.value(engine) == QLatin1String("deeplxfree")) {
         m_engine = QOnlineTranslator::DeepLXFree;
+        m_translator->setLanguageRegions(AppSettings().regions(QOnlineTranslator::Engine::DeepLX)); // Shared by DeepLX and DeepLXFree
     } else {
         qCritical() << tr("Error: Unknown engine") << '\n';
         parser.showHelp();

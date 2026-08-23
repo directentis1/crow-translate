@@ -989,6 +989,7 @@ void MainWindow::loadAppSettings()
     m_translator->setEngineUrl(QOnlineTranslator::Lingva, settings.engineUrl(QOnlineTranslator::Lingva));
     m_translator->setEngineUrl(QOnlineTranslator::DeepLX, settings.engineUrl(QOnlineTranslator::DeepLX));
     m_translator->setEngineApiKey(QOnlineTranslator::DeepLX, settings.engineApiKey(QOnlineTranslator::DeepLX));
+    m_translator->setLanguageRegions(settings.regions(QOnlineTranslator::DeepLX)); // Shared by DeepLX and DeepLXFree
 
     // OCR settings
     if (const QByteArray languages = settings.ocrLanguagesString(), path = settings.ocrLanguagesPath(); !m_ocr->init(languages, path, settings.tesseractParameters())) {
