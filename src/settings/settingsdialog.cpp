@@ -115,6 +115,9 @@ SettingsDialog::SettingsDialog(MainWindow *parent)
     for (QOnlineTranslator::Language configurableLang : QOnlineTts::validRegions().keys())
         ui->googleLanguageComboBox->addItem(QOnlineTranslator::languageName(configurableLang), configurableLang);
 
+    for (QOnlineTranslator::Language configurableLang : QOnlineTranslator::validLanguageRegions().keys())
+        ui->deeplLanguageComboBox->addItem(LanguageButtonsWidget::countryIcon(configurableLang), QOnlineTranslator::languageName(configurableLang), configurableLang);
+
     // Sort languages in comboboxes alphabetically
     ui->primaryLangComboBox->model()->sort(0);
     ui->secondaryLangComboBox->model()->sort(0);
@@ -256,6 +259,7 @@ void SettingsDialog::accept()
     settings.setEngineUrl(QOnlineTranslator::Lingva, ui->lingvaUrlComboBox->currentText());
     settings.setEngineUrl(QOnlineTranslator::DeepLX, ui->deeplxUrlComboBox->currentText());
     settings.setEngineApiKey(QOnlineTranslator::DeepLX, ui->deeplxApiKeyTextEdit->text().toUtf8());
+    settings.setRegions(QOnlineTranslator::DeepLX, m_deeplRegions); // Shared by DeepLX and DeepLXFree
 
     // OCR
     settings.setConvertLineBreaks(ui->convertLineBreaksCheckBox->isChecked());
@@ -438,6 +442,31 @@ void SettingsDialog::speakGoogleTestText()
     speakTestText(*m_googleTranslator, QOnlineTranslator::Google);
 }
 
+void SettingsDialog::onDeeplLanguageSelectionChanged(int languageIndex)
+{
+    const auto configuredLang = ui->deeplLanguageComboBox->itemData(languageIndex).value<QOnlineTranslator::Language>();
+    const QLocale::Country langRegion = m_deeplRegions.value(configuredLang, QLocale::AnyCountry); // It will be lost after deeplRegionComboBox is changed if not stored here
+
+    ui->deeplRegionComboBox->clear();
+
+    ui->deeplRegionComboBox->addItem(LanguageButtonsWidget::countryIcon(configuredLang), tr("Default region"), QLocale::AnyCountry);
+    for (QLocale::Country validRegion : QOnlineTranslator::validLanguageRegions().value(configuredLang))
+        ui->deeplRegionComboBox->addItem(LanguageButtonsWidget::countryIcon(configuredLang, validRegion), QLocale::countryToString(validRegion), validRegion);
+
+    ui->deeplRegionComboBox->setCurrentIndex(ui->deeplRegionComboBox->findData(langRegion));
+}
+
+void SettingsDialog::saveDeeplEngineRegion(int region)
+{
+    const auto lang = ui->deeplLanguageComboBox->currentData().value<QOnlineTranslator::Language>();
+    const auto country = ui->deeplRegionComboBox->itemData(region).value<QLocale::Country>();
+
+    if (country == QLocale::AnyCountry)
+        m_deeplRegions.remove(lang);
+    else
+        m_deeplRegions[lang] = country;
+}
+
 void SettingsDialog::loadShortcut(ShortcutItem *item)
 {
     if (item->childCount() == 0) {
@@ -569,6 +598,9 @@ void SettingsDialog::restoreDefaults()
     ui->lingvaUrlComboBox->setCurrentText(AppSettings::defaultEngineUrl(QOnlineTranslator::Lingva));
     ui->deeplxUrlComboBox->setCurrentText(AppSettings::defaultEngineUrl(QOnlineTranslator::DeepLX));
     ui->deeplxApiKeyTextEdit->setText(AppSettings::defaultEngineApiKey(QOnlineTranslator::DeepLX));
+    m_deeplRegions = AppSettings::defaultRegions(QOnlineTranslator::DeepLX); // Shared by DeepLX and DeepLXFree
+    if (ui->deeplLanguageComboBox->count() != 0)
+        onDeeplLanguageSelectionChanged(ui->deeplLanguageComboBox->currentIndex());
 
     // OCR
     ui->convertLineBreaksCheckBox->setChecked(AppSettings::defaultConvertLineBreaks());
@@ -682,6 +714,9 @@ void SettingsDialog::loadSettings()
     ui->lingvaUrlComboBox->setCurrentText(settings.engineUrl(QOnlineTranslator::Lingva));
     ui->deeplxUrlComboBox->setCurrentText(settings.engineUrl(QOnlineTranslator::DeepLX));
     ui->deeplxApiKeyTextEdit->setText(settings.engineApiKey(QOnlineTranslator::DeepLX));
+    m_deeplRegions = settings.regions(QOnlineTranslator::DeepLX); // Shared by DeepLX and DeepLXFree
+    if (ui->deeplLanguageComboBox->count() != 0)
+        onDeeplLanguageSelectionChanged(ui->deeplLanguageComboBox->currentIndex());
 
     // OCR
     ui->convertLineBreaksCheckBox->setChecked(settings.isConvertLineBreaks());
