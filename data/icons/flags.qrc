@@ -4,18 +4,28 @@
         <file alias="af.svg">third-party/circle-flags/flags/af.svg</file>
         <file alias="al.svg">third-party/circle-flags/flags/al.svg</file>
         <file alias="am.svg">third-party/circle-flags/flags/am.svg</file>
+        <file alias="ar.svg">third-party/circle-flags/flags/ar.svg</file>
         <file alias="aw.svg">third-party/circle-flags/flags/aw.svg</file>
         <file alias="az.svg">third-party/circle-flags/flags/az.svg</file>
         <file alias="ba.svg">third-party/circle-flags/flags/ba.svg</file>
         <file alias="bd.svg">third-party/circle-flags/flags/bd.svg</file>
         <file alias="bg.svg">third-party/circle-flags/flags/bg.svg</file>
+        <file alias="bo.svg">third-party/circle-flags/flags/bo.svg</file>
         <file alias="br.svg">third-party/circle-flags/flags/br.svg</file>
         <file alias="by.svg">third-party/circle-flags/flags/by.svg</file>
+        <file alias="ca.svg">third-party/circle-flags/flags/ca.svg</file>
+        <file alias="ch.svg">third-party/circle-flags/flags/ch.svg</file>
+        <file alias="cl.svg">third-party/circle-flags/flags/cl.svg</file>
         <file alias="cn.svg">third-party/circle-flags/flags/cn.svg</file>
         <file alias="cn-xj.svg">third-party/circle-flags/flags/cn-xj.svg</file>
+        <file alias="co.svg">third-party/circle-flags/flags/co.svg</file>
+        <file alias="cr.svg">third-party/circle-flags/flags/cr.svg</file>
+        <file alias="cu.svg">third-party/circle-flags/flags/cu.svg</file>
         <file alias="cz.svg">third-party/circle-flags/flags/cz.svg</file>
         <file alias="de.svg">third-party/circle-flags/flags/de.svg</file>
         <file alias="dk.svg">third-party/circle-flags/flags/dk.svg</file>
+        <file alias="do.svg">third-party/circle-flags/flags/do.svg</file>
+        <file alias="ec.svg">third-party/circle-flags/flags/ec.svg</file>
         <file alias="ee.svg">third-party/circle-flags/flags/ee.svg</file>
         <file alias="eg.svg">third-party/circle-flags/flags/eg.svg</file>
         <file alias="es-ga.svg">third-party/circle-flags/flags/es-ga.svg</file>
@@ -32,11 +42,12 @@
         <file alias="gb.svg">third-party/circle-flags/flags/gb.svg</file>
         <file alias="ge.svg">third-party/circle-flags/flags/ge.svg</file>
         <file alias="gr.svg">third-party/circle-flags/flags/gr.svg</file>
+        <file alias="gt.svg">third-party/circle-flags/flags/gt.svg</file>
         <file alias="hk.svg">third-party/circle-flags/flags/hk.svg</file>
+        <file alias="hn.svg">third-party/circle-flags/flags/hn.svg</file>
         <file alias="hr.svg">third-party/circle-flags/flags/hr.svg</file>
         <file alias="ht.svg">third-party/circle-flags/flags/ht.svg</file>
         <file alias="hu.svg">third-party/circle-flags/flags/hu.svg</file>
-        <file alias="id.svg">third-party/circle-flags/flags/id.svg</file>
         <file alias="id.svg">third-party/circle-flags/flags/id.svg</file>
         <file alias="ie.svg">third-party/circle-flags/flags/ie.svg</file>
         <file alias="il.svg">third-party/circle-flags/flags/il.svg</file>
@@ -67,15 +78,20 @@
         <file alias="my.svg">third-party/circle-flags/flags/my.svg</file>
         <file alias="ne.svg">third-party/circle-flags/flags/ne.svg</file>
         <file alias="ng.svg">third-party/circle-flags/flags/ng.svg</file>
+        <file alias="ni.svg">third-party/circle-flags/flags/ni.svg</file>
         <file alias="nl.svg">third-party/circle-flags/flags/nl.svg</file>
         <file alias="no.svg">third-party/circle-flags/flags/no.svg</file>
         <file alias="np.svg">third-party/circle-flags/flags/np.svg</file>
         <file alias="nz.svg">third-party/circle-flags/flags/nz.svg</file>
+        <file alias="pa.svg">third-party/circle-flags/flags/pa.svg</file>
+        <file alias="pe.svg">third-party/circle-flags/flags/pe.svg</file>
         <file alias="pf.svg">third-party/circle-flags/flags/pf.svg</file>
         <file alias="ph.svg">third-party/circle-flags/flags/ph.svg</file>
         <file alias="pk.svg">third-party/circle-flags/flags/pk.svg</file>
         <file alias="pl.svg">third-party/circle-flags/flags/pl.svg</file>
+        <file alias="pr.svg">third-party/circle-flags/flags/pr.svg</file>
         <file alias="pt.svg">third-party/circle-flags/flags/pt.svg</file>
+        <file alias="py.svg">third-party/circle-flags/flags/py.svg</file>
         <file alias="ro.svg">third-party/circle-flags/flags/ro.svg</file>
         <file alias="rs.svg">third-party/circle-flags/flags/rs.svg</file>
         <file alias="ru.svg">third-party/circle-flags/flags/ru.svg</file>
@@ -86,6 +102,7 @@
         <file alias="sk.svg">third-party/circle-flags/flags/sk.svg</file>
         <file alias="sl.svg">third-party/circle-flags/flags/sl.svg</file>
         <file alias="so.svg">third-party/circle-flags/flags/so.svg</file>
+        <file alias="sv.svg">third-party/circle-flags/flags/sv.svg</file>
         <file alias="th.svg">third-party/circle-flags/flags/th.svg</file>
         <file alias="tj.svg">third-party/circle-flags/flags/tj.svg</file>
         <file alias="tk.svg">third-party/circle-flags/flags/tk.svg</file>
@@ -95,11 +112,14 @@
         <file alias="tw.svg">third-party/circle-flags/flags/tw.svg</file>
         <file alias="ua.svg">third-party/circle-flags/flags/ua.svg</file>
         <file alias="us.svg">third-party/circle-flags/flags/us.svg</file>
+        <file alias="uy.svg">third-party/circle-flags/flags/uy.svg</file>
         <file alias="uz.svg">third-party/circle-flags/flags/uz.svg</file>
         <file alias="va.svg">third-party/circle-flags/flags/va.svg</file>
+        <file alias="ve.svg">third-party/circle-flags/flags/ve.svg</file>
         <file alias="vn.svg">third-party/circle-flags/flags/vn.svg</file>
         <file alias="ws.svg">third-party/circle-flags/flags/ws.svg</file>
         <file alias="za.svg">third-party/circle-flags/flags/za.svg</file>
         <file alias="zw.svg">third-party/circle-flags/flags/zw.svg</file>
     </qresource>
 </RCC>
+
