@@ -115,6 +115,9 @@ private slots:
     void requestSourceLanguage();
     void parseSourceLanguage();
 
+    void updateLanguageRegionsAvailability();
+    void saveLanguageRegion(QOnlineTranslator::Language lang, QLocale::Country country);
+
     void speakSource();
     void speakTranslation();
 

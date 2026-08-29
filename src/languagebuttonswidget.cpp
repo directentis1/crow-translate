@@ -23,13 +23,38 @@
 #include "languagesdialog.h"
 #include "screenwatcher.h"
 
+#include <QActionGroup>
 #include <QButtonGroup>
+#include <QMenu>
 #include <QMessageBox>
 #include <QScreen>
 #include <QTimer>
 #include <QToolButton>
 
 using namespace std::chrono_literals;
+
+namespace
+{
+// QOnlineTranslator::validLanguageRegions() currently only ever contains these languages, so a
+// small explicit map is simpler and safer than trying to reverse QOnlineTranslator::language(QLocale).
+QLocale::Language toQLocaleLanguage(QOnlineTranslator::Language lang)
+{
+    switch (lang) {
+    case QOnlineTranslator::English:
+        return QLocale::English;
+    case QOnlineTranslator::French:
+        return QLocale::French;
+    case QOnlineTranslator::German:
+        return QLocale::German;
+    case QOnlineTranslator::Portuguese:
+        return QLocale::Portuguese;
+    case QOnlineTranslator::Spanish:
+        return QLocale::Spanish;
+    default:
+        return QLocale::AnyLanguage;
+    }
+}
+} // namespace
 
 LanguageButtonsWidget::LanguageButtonsWidget(QWidget *parent)
     : QWidget(parent)
@@ -379,6 +404,60 @@ QIcon LanguageButtonsWidget::countryIcon(QOnlineTranslator::Language lang)
     }
 }
 
+QIcon LanguageButtonsWidget::countryIcon(QOnlineTranslator::Language lang, QLocale::Country country)
+{
+    if (country == QLocale::AnyCountry)
+        return countryIcon(lang);
+
+    const QLocale::Language qlocaleLang = toQLocaleLanguage(lang);
+    if (qlocaleLang == QLocale::AnyLanguage)
+        return countryIcon(lang); // No regional variants known for this language, fall back
+
+    // Same approach SettingsDialog::addLocale() uses: build the locale and read the country code
+    // back out of its name (Qt doesn't expose a direct QLocale::Country -> ISO code conversion).
+    const QString localeName = QLocale(qlocaleLang, country).name();
+    const int separatorIndex = localeName.indexOf(QLatin1Char('_'));
+    if (separatorIndex == -1)
+        return countryIcon(lang); // Locale couldn't resolve a region for this language/country pair
+
+    const QString countryCode = localeName.mid(separatorIndex + 1).toLower();
+    return QIcon(QStringLiteral(":/icons/flags/%1.svg").arg(countryCode));
+}
+
+void LanguageButtonsWidget::setLanguageRegionsEnabled(bool enabled)
+{
+    if (m_languageRegionsEnabled == enabled)
+        return;
+
+    m_languageRegionsEnabled = enabled;
+
+    // Rebuild every button's context menu (and icon) to reflect the new state
+    for (int i = 0; i < m_languages.size(); ++i)
+        setupRegionMenu(m_buttonGroup->button(i), m_languages[i]);
+}
+
+bool LanguageButtonsWidget::languageRegionsEnabled() const
+{
+    return m_languageRegionsEnabled;
+}
+
+void LanguageButtonsWidget::setLanguageRegions(const QMap<QOnlineTranslator::Language, QLocale::Country> &regions)
+{
+    if (m_languageRegions == regions)
+        return;
+
+    m_languageRegions = regions;
+
+    // Refresh icons and menu checkmarks (preferences may have been changed elsewhere, e.g. reset in Settings)
+    for (int i = 0; i < m_languages.size(); ++i)
+        setupRegionMenu(m_buttonGroup->button(i), m_languages[i]);
+}
+
+const QMap<QOnlineTranslator::Language, QLocale::Country> &LanguageButtonsWidget::languageRegions() const
+{
+    return m_languageRegions;
+}
+
 void LanguageButtonsWidget::swapCurrentLanguages(LanguageButtonsWidget *first, LanguageButtonsWidget *second)
 {
     // Backup first widget buttons properties
@@ -540,12 +619,78 @@ void LanguageButtonsWidget::setButtonLanguage(QAbstractButton *button, QOnlineTr
             button->setText(tr("Auto"));
         else
             button->setText(tr("Auto") + " (" + langName + ")");
+        button->setToolTip(QOnlineTranslator::languageName(lang));
     } else {
         button->setText(langName);
+        setupRegionMenu(button, lang); // Also (re)applies the correct flag icon
+
+        QString tooltip = QOnlineTranslator::languageName(lang);
+        if (m_languageRegionsEnabled && QOnlineTranslator::validLanguageRegions().contains(lang))
+            tooltip += QLatin1Char('\n') + tr("Right-click to choose a regional variant");
+        button->setToolTip(tooltip);
+    }
+}
+
+void LanguageButtonsWidget::updateButtonIcon(QAbstractButton *button, QOnlineTranslator::Language lang)
+{
+    if (!button)
+        return;
+
+    if (m_languageRegionsEnabled && QOnlineTranslator::validLanguageRegions().contains(lang))
+        button->setIcon(countryIcon(lang, m_languageRegions.value(lang, QLocale::AnyCountry)));
+    else
         button->setIcon(countryIcon(lang));
+}
+
+void LanguageButtonsWidget::setupRegionMenu(QAbstractButton *button, QOnlineTranslator::Language lang)
+{
+    if (!button)
+        return;
+
+    // Tear down any previous menu/context-menu wiring first - the button may be getting reused
+    // for a different language (e.g. after editing the language list), or regions may have just
+    // been disabled entirely.
+    disconnect(button, &QAbstractButton::customContextMenuRequested, nullptr, nullptr);
+    button->setContextMenuPolicy(Qt::NoContextMenu);
+    delete button->findChild<QMenu *>(QString(), Qt::FindDirectChildrenOnly);
+
+    updateButtonIcon(button, lang);
+
+    if (!m_languageRegionsEnabled || !QOnlineTranslator::validLanguageRegions().contains(lang))
+        return;
+
+    const QLocale::Country currentRegion = m_languageRegions.value(lang, QLocale::AnyCountry);
+
+    auto *menu = new QMenu(button);
+    auto *group = new QActionGroup(menu);
+    group->setExclusive(true);
+
+    QAction *defaultAction = menu->addAction(countryIcon(lang), tr("Default region"));
+    defaultAction->setCheckable(true);
+    defaultAction->setChecked(currentRegion == QLocale::AnyCountry);
+    group->addAction(defaultAction);
+    connect(defaultAction, &QAction::triggered, this, [this, button, lang] {
+        m_languageRegions[lang] = QLocale::AnyCountry;
+        updateButtonIcon(button, lang);
+        emit languageRegionChanged(lang, QLocale::AnyCountry);
+    });
+
+    for (QLocale::Country region : QOnlineTranslator::validLanguageRegions().value(lang)) {
+        QAction *action = menu->addAction(countryIcon(lang, region), QLocale::countryToString(region));
+        action->setCheckable(true);
+        action->setChecked(region == currentRegion);
+        group->addAction(action);
+        connect(action, &QAction::triggered, this, [this, button, lang, region] {
+            m_languageRegions[lang] = region;
+            updateButtonIcon(button, lang);
+            emit languageRegionChanged(lang, region);
+        });
     }
 
-    button->setToolTip(QOnlineTranslator::languageName(lang));
+    button->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(button, &QAbstractButton::customContextMenuRequested, button, [menu, button](const QPoint &pos) {
+        menu->exec(button->mapToGlobal(pos));
+    });
 }
 
 QString LanguageButtonsWidget::languageString(QOnlineTranslator::Language lang)

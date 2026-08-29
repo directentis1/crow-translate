@@ -117,6 +117,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->translationLanguagesWidget, &LanguageButtonsWidget::buttonChecked, this, &MainWindow::checkLanguageButton);
     connect(ui->sourceEdit, &SourceTextEdit::textChanged, this, &MainWindow::resetAutoSourceButtonText);
 
+    // Regional variants (DeepLX/DeepLXFree targets only) - picked via right-click on the target language button
+    connect(ui->translationLanguagesWidget, &LanguageButtonsWidget::languageRegionChanged, this, &MainWindow::saveLanguageRegion);
+    connect(ui->engineComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &MainWindow::updateLanguageRegionsAvailability);
+
     // OCR logic
     connect(m_screenGrabber, &AbstractScreenGrabber::grabbed, m_snippingArea, &SnippingArea::snip);
     connect(m_snippingArea, &SnippingArea::snipped, m_ocr, &Ocr::recognize);
@@ -411,6 +415,29 @@ void MainWindow::parseSourceLanguage()
     }
 
     ui->sourceLanguagesWidget->setAutoLanguage(m_translator->sourceLanguage());
+}
+
+// Only DeepLX/DeepLXFree support translating into a specific regional variant
+void MainWindow::updateLanguageRegionsAvailability()
+{
+    const bool enabled = currentEngine() == QOnlineTranslator::DeepLX || currentEngine() == QOnlineTranslator::DeepLXFree;
+    ui->translationLanguagesWidget->setLanguageRegionsEnabled(enabled);
+}
+
+// Called when a regional variant is picked from the target language button's context menu
+void MainWindow::saveLanguageRegion(QOnlineTranslator::Language lang, QLocale::Country country)
+{
+    AppSettings settings;
+    QMap<QOnlineTranslator::Language, QLocale::Country> regions = settings.regions(QOnlineTranslator::DeepLX);
+    if (country == QLocale::AnyCountry)
+        regions.remove(lang);
+    else
+        regions[lang] = country;
+    settings.setRegions(QOnlineTranslator::DeepLX, regions); // Shared by DeepLX and DeepLXFree
+
+    m_translator->setLanguageRegions(regions);
+
+    markContentAsChanged(); // Re-translate with the newly selected regional variant
 }
 
 void MainWindow::speakSource()
@@ -990,6 +1017,8 @@ void MainWindow::loadAppSettings()
     m_translator->setEngineUrl(QOnlineTranslator::DeepLX, settings.engineUrl(QOnlineTranslator::DeepLX));
     m_translator->setEngineApiKey(QOnlineTranslator::DeepLX, settings.engineApiKey(QOnlineTranslator::DeepLX));
     m_translator->setLanguageRegions(settings.regions(QOnlineTranslator::DeepLX)); // Shared by DeepLX and DeepLXFree
+    ui->translationLanguagesWidget->setLanguageRegions(settings.regions(QOnlineTranslator::DeepLX));
+    updateLanguageRegionsAvailability();
 
     // OCR settings
     if (const QByteArray languages = settings.ocrLanguagesString(), path = settings.ocrLanguagesPath(); !m_ocr->init(languages, path, settings.tesseractParameters())) {
