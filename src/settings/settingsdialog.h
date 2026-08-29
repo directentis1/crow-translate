@@ -23,7 +23,6 @@
 #include "qonlinetts.h"
 
 #include <QDialog>
-#include <QMap>
 
 class MainWindow;
 class AbstractAutostartManager;
@@ -81,9 +80,6 @@ private slots:
     void detectGoogleTextLanguage();
     void speakGoogleTestText();
 
-    void onDeeplLanguageSelectionChanged(int languageIndex);
-    void saveDeeplEngineRegion(int region);
-
     void loadShortcut(ShortcutItem *item);
     void updateAcceptButton();
     void acceptCurrentShortcut();
@@ -113,11 +109,6 @@ private:
     // Test voice
     QOnlineTranslator *m_yandexTranslator;
     QOnlineTranslator *m_googleTranslator;
-
-    // DeepLX/DeepLXFree regional variant preferences, keyed by generic language.
-    // Unlike Google's TTS regions, there's no persistent widget to hold this live in the dialog,
-    // so it's kept here and only pushed through deeplLanguageComboBox/deeplRegionComboBox for editing.
-    QMap<QOnlineTranslator::Language, QLocale::Country> m_deeplRegions;
 
 #ifdef WITH_PORTABLE_MODE
     QCheckBox *m_portableCheckbox;
