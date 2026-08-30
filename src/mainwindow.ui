@@ -314,7 +314,7 @@
       <item>
        <widget class="QGroupBox" name="reverseTranslationGroupBox">
         <property name="title">
-         <string>Reverse translation</string>
+         <string notr="true"/>
         </property>
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The translation above, translated back into the source language with the same engine, to help judge translation quality&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -344,6 +344,88 @@
             <string>Reverse translation</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="reverseTranslationButtonsLayout">
+           <item>
+            <spacer name="reverseTranslationButtonsSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QComboBox" name="reverseLanguageComboBox">
+             <property name="toolTip">
+              <string>Language to translate the reverse translation into. "Auto" mirrors the source language.</string>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>1</width>
+               <height>1</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="SpeakButtons" name="reverseSpeakButtons" native="true">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="copyReverseTranslationButton">
+             <property name="toolTip">
+              <string>Copy reverse translation to the clipboard</string>
+             </property>
+             <property name="icon">
+              <iconset theme="edit-copy">
+               <normaloff>.</normaloff>.</iconset>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="reverseBottomControlsWidget" native="true">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+        <layout class="QHBoxLayout" name="reverseBottomControlsLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <spacer name="reverseBottomControlsSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>
@@ -402,6 +484,8 @@
   <tabstop>engineComboBox</tabstop>
   <tabstop>copyTranslationButton</tabstop>
   <tabstop>copyAllTranslationButton</tabstop>
+  <tabstop>reverseLanguageComboBox</tabstop>
+  <tabstop>copyReverseTranslationButton</tabstop>
   <tabstop>settingsButton</tabstop>
  </tabstops>
  <resources>
@@ -513,6 +597,22 @@
     <hint type="sourcelabel">
      <x>588</x>
      <y>276</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>324</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>copyReverseTranslationButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>copyReverseTranslation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>588</x>
+     <y>320</y>
     </hint>
     <hint type="destinationlabel">
      <x>324</x>
@@ -688,6 +788,7 @@
   <slot>copySourceText()</slot>
   <slot>copyTranslation()</slot>
   <slot>copyAllTranslationInfo()</slot>
+  <slot>copyReverseTranslation()</slot>
   <slot>cancelOperation()</slot>
   <slot>clearText()</slot>
   <slot>delayedRecognizeScreenArea()</slot>

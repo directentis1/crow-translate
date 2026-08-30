@@ -68,6 +68,9 @@ public:
     const LanguageButtonsWidget *translationLanguageButtons() const;
     const SpeakButtons *sourceSpeakButtons() const;
     const SpeakButtons *translationSpeakButtons() const;
+    const SpeakButtons *reverseSpeakButtons() const;
+    const QComboBox *reverseLanguageComboBox() const;
+    const QToolButton *copyReverseTranslationButton() const;
     QKeySequence closeWindowShortcut() const;
     Ocr *ocr() const;
 
@@ -116,6 +119,9 @@ private slots:
 
     void requestReverseTranslation();
     void displayReverseTranslation();
+    void speakReverseTranslation();
+    void copyReverseTranslation();
+    void updateReverseControlsAvailability();
 
     void requestSourceLanguage();
     void parseSourceLanguage();
@@ -156,6 +162,7 @@ private:
     void buildSpeakSourceState(QState *state) const;
     void buildTranslateSelectionState(QState *state) const;
     void buildSpeakTranslationState(QState *state) const;
+    void buildSpeakReverseTranslationState(QState *state) const;
     void buildSpeakSelectionState(QState *state) const;
     void buildSpeakTranslatedSelectionState(QState *state) const;
     void buildCopyTranslatedSelectionState(QState *state) const;
@@ -173,6 +180,10 @@ private:
     void loadMainWindowSettings();
     void loadAppSettings();
     void checkLanguageButton(int checkedId);
+
+    // Moves the settings/engine controls below the reverse translation box when it's shown,
+    // and back to their original spot in translationButtonsLayout when it's hidden.
+    void repositionEngineControls(bool reverseEnabled);
 
     QOnlineTranslator::Language preferredTranslationLanguage(QOnlineTranslator::Language sourceLang) const;
     QOnlineTranslator::Engine currentEngine() const;
