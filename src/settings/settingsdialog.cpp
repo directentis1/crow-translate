@@ -37,6 +37,7 @@
 #include <QDate>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QMetaEnum>
 #include <QScreen>
 #include <QSignalBlocker>
 #include <QStandardItemModel>
@@ -71,6 +72,30 @@ SettingsDialog::SettingsDialog(MainWindow *parent)
 
     ui->googlePlayerButtons->setMediaPlayer(new QMediaPlayer);
     connect(m_googleTranslator, &QOnlineTranslator::finished, this, &SettingsDialog::speakGoogleTestText);
+
+    // Speech engine: independent of the translation engine, so e.g. DeepLX/DeepLXFree can be
+    // used to translate while any TTS-capable engine is used to actually speak the result.
+    for (int i = 0; i <= QOnlineTranslator::DeepLXFree; ++i) {
+        const auto engine = static_cast<QOnlineTranslator::Engine>(i);
+        if (!QOnlineTts::isSupportTts(engine))
+            continue;
+
+        QString iconFile;
+        switch (engine) {
+        case QOnlineTranslator::Google:
+            iconFile = QStringLiteral(":/icons/engines/google.svg");
+            break;
+        case QOnlineTranslator::Yandex:
+            iconFile = QStringLiteral(":/icons/engines/yandex.svg");
+            break;
+        default:
+            break;
+        }
+
+        const QString engineName = QString::fromUtf8(QMetaEnum::fromType<QOnlineTranslator::Engine>().valueToKey(engine));
+        ui->speechEngineComboBox->addItem(QIcon(iconFile), engineName, engine);
+    }
+    connect(ui->speechEngineComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &SettingsDialog::onSpeechEngineChanged);
 
     // Set item data in comboboxes
     ui->localeComboBox->addItem(tr("<System language>"), AppSettings::defaultLocale());
@@ -277,6 +302,7 @@ void SettingsDialog::accept()
     settings.setVoice(QOnlineTranslator::Yandex, ui->yandexPlayerButtons->voice(QOnlineTranslator::Yandex));
     settings.setEmotion(QOnlineTranslator::Yandex, ui->yandexPlayerButtons->emotion(QOnlineTranslator::Yandex));
     settings.setRegions(QOnlineTranslator::Google, ui->googlePlayerButtons->regions(QOnlineTranslator::Google));
+    settings.setTtsEngine(ui->speechEngineComboBox->currentData().value<QOnlineTranslator::Engine>());
 
     // Connection settings
     settings.setProxyType(static_cast<QNetworkProxy::ProxyType>(ui->proxyTypeComboBox->currentIndex()));
@@ -331,6 +357,16 @@ void SettingsDialog::onWindowModeChanged(int mode)
     } else {
         ui->showTrayIconCheckBox->setEnabled(true);
     }
+}
+
+// Visually flag which engine's settings are actually used to speak text right now (both engines'
+// settings stay editable/testable regardless, since this is just a preference for runtime playback)
+void SettingsDialog::onSpeechEngineChanged(int index)
+{
+    const auto engine = ui->speechEngineComboBox->itemData(index).value<QOnlineTranslator::Engine>();
+
+    ui->yandexSpeechGroupBox->setStyleSheet(engine == QOnlineTranslator::Yandex ? QStringLiteral("QGroupBox::title { font-weight: bold; }") : QString());
+    ui->googleSpeechGroupBox->setStyleSheet(engine == QOnlineTranslator::Google ? QStringLiteral("QGroupBox::title { font-weight: bold; }") : QString());
 }
 
 // Disable (enable) "Custom icon path" option
@@ -620,6 +656,8 @@ void SettingsDialog::restoreDefaults()
     ui->yandexPlayerButtons->setVoice(QOnlineTranslator::Yandex, AppSettings::defaultVoice(QOnlineTranslator::Yandex));
     ui->yandexPlayerButtons->setEmotion(QOnlineTranslator::Yandex, AppSettings::defaultEmotion(QOnlineTranslator::Yandex));
     ui->googlePlayerButtons->setRegions(QOnlineTranslator::Google, AppSettings::defaultRegions(QOnlineTranslator::Google));
+    ui->speechEngineComboBox->setCurrentIndex(ui->speechEngineComboBox->findData(AppSettings::defaultTtsEngine()));
+    onSpeechEngineChanged(ui->speechEngineComboBox->currentIndex());
 
     // Connection settings
     ui->proxyTypeComboBox->setCurrentIndex(AppSettings::defaultProxyType());
@@ -736,6 +774,8 @@ void SettingsDialog::loadSettings()
     ui->yandexPlayerButtons->setVoice(QOnlineTranslator::Yandex, settings.voice(QOnlineTranslator::Yandex));
     ui->yandexPlayerButtons->setEmotion(QOnlineTranslator::Yandex, settings.emotion(QOnlineTranslator::Yandex));
     ui->googlePlayerButtons->setRegions(QOnlineTranslator::Google, settings.regions(QOnlineTranslator::Google));
+    ui->speechEngineComboBox->setCurrentIndex(ui->speechEngineComboBox->findData(settings.ttsEngine()));
+    onSpeechEngineChanged(ui->speechEngineComboBox->currentIndex());
 
     // Connection settings
     ui->proxyTypeComboBox->setCurrentIndex(settings.proxyType());

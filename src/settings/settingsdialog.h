@@ -62,6 +62,7 @@ private slots:
 
     void onProxyTypeChanged(int type);
     void onWindowModeChanged(int mode);
+    void onSpeechEngineChanged(int index);
 
     void onTrayIconTypeChanged(int type);
     void selectCustomTrayIcon();

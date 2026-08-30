@@ -226,6 +226,12 @@ public:
     void setRegions(QOnlineTranslator::Engine engine, const QMap<QOnlineTranslator::Language, QLocale::Country> &regions);
     static QMap<QOnlineTranslator::Language, QLocale::Country> defaultRegions(QOnlineTranslator::Engine engine);
 
+    // Engine used to actually play speech, independent of the translation engine
+    // (e.g. translate with DeepLX/DeepLXFree, but speak with Google or Yandex).
+    QOnlineTranslator::Engine ttsEngine() const;
+    void setTtsEngine(QOnlineTranslator::Engine engine);
+    static QOnlineTranslator::Engine defaultTtsEngine();
+
     // Connection settings
     QNetworkProxy::ProxyType proxyType() const;
     void setProxyType(QNetworkProxy::ProxyType type);

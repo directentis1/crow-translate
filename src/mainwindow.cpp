@@ -442,12 +442,12 @@ void MainWindow::saveLanguageRegion(QOnlineTranslator::Language lang, QLocale::C
 
 void MainWindow::speakSource()
 {
-    ui->sourceSpeakButtons->speak(ui->sourceEdit->toSourceText(), ui->sourceLanguagesWidget->checkedLanguage(), currentEngine());
+    ui->sourceSpeakButtons->speak(ui->sourceEdit->toSourceText(), ui->sourceLanguagesWidget->checkedLanguage(), ttsEngine());
 }
 
 void MainWindow::speakTranslation()
 {
-    ui->translationSpeakButtons->speak(ui->translationEdit->translation(), ui->translationEdit->translationLanguage(), currentEngine());
+    ui->translationSpeakButtons->speak(ui->translationEdit->translation(), ui->translationEdit->translationLanguage(), ttsEngine());
 }
 
 void MainWindow::showTranslationWindow()
@@ -1009,6 +1009,7 @@ void MainWindow::loadAppSettings()
     m_secondaryLanguage = settings.secondaryLanguage();
     m_forceSourceAutodetect = settings.isForceSourceAutodetect();
     m_forceTranslationAutodetect = settings.isForceTranslationAutodetect();
+    m_ttsEngine = settings.ttsEngine();
 
     // Engine settings
     m_translator->setEngineUrl(QOnlineTranslator::LibreTranslate, settings.engineUrl(QOnlineTranslator::LibreTranslate));
@@ -1150,4 +1151,9 @@ QOnlineTranslator::Language MainWindow::preferredTranslationLanguage(QOnlineTran
 QOnlineTranslator::Engine MainWindow::currentEngine() const
 {
     return static_cast<QOnlineTranslator::Engine>(ui->engineComboBox->currentIndex());
+}
+
+QOnlineTranslator::Engine MainWindow::ttsEngine() const
+{
+    return m_ttsEngine;
 }

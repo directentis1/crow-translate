@@ -171,6 +171,7 @@ private:
 
     QOnlineTranslator::Language preferredTranslationLanguage(QOnlineTranslator::Language sourceLang) const;
     QOnlineTranslator::Engine currentEngine() const;
+    QOnlineTranslator::Engine ttsEngine() const;
 
     Ui::MainWindow *ui;
 
@@ -199,6 +200,11 @@ private:
 
     QOnlineTranslator::Language m_primaryLanguage;
     QOnlineTranslator::Language m_secondaryLanguage;
+
+    // Engine actually used to speak text, independent of currentEngine() (the translation
+    // engine) - so translation-only engines like DeepLX/DeepLXFree can still be spoken aloud
+    // using a TTS-capable engine such as Google or Yandex. Loaded from AppSettings::ttsEngine().
+    QOnlineTranslator::Engine m_ttsEngine = QOnlineTranslator::Google;
 
     AppSettings::WindowMode m_windowMode;
 

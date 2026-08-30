@@ -758,6 +758,28 @@ QMap<QOnlineTranslator::Language, QLocale::Country> AppSettings::defaultRegions(
     }
 }
 
+QOnlineTranslator::Engine AppSettings::ttsEngine() const
+{
+    const auto engine = m_settings->value(QStringLiteral("Speech/Engine"), defaultTtsEngine()).value<QOnlineTranslator::Engine>();
+
+    // Guard against a stale/foreign value (e.g. edited config file) pointing at an engine
+    // that doesn't actually support TTS.
+    if (!QOnlineTts::isSupportTts(engine))
+        return defaultTtsEngine();
+
+    return engine;
+}
+
+void AppSettings::setTtsEngine(QOnlineTranslator::Engine engine)
+{
+    m_settings->setValue(QStringLiteral("Speech/Engine"), engine);
+}
+
+QOnlineTranslator::Engine AppSettings::defaultTtsEngine()
+{
+    return QOnlineTranslator::Google;
+}
+
 QNetworkProxy::ProxyType AppSettings::proxyType() const
 {
     return static_cast<QNetworkProxy::ProxyType>(m_settings->value(QStringLiteral("Connection/ProxyType"), defaultProxyType()).toInt());
