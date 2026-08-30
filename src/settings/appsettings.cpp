@@ -699,11 +699,18 @@ QMap<QOnlineTranslator::Language, QLocale::Country> AppSettings::regions(QOnline
             regions[lang] = regionSettings.value(QOnlineTranslator::languageName(lang)).value<QLocale::Country>();
         return regions;
     }
+    case QOnlineTranslator::DeepLX:
+    case QOnlineTranslator::DeepLXFree: { // Shared preference between the two
+        const auto regionSettings(m_settings->value(QStringLiteral("Translation/DeepLRegions")).value<QMap<QString, QVariant>>());
+        QMap<QOnlineTranslator::Language, QLocale::Country> regions;
+        for (const QOnlineTranslator::Language lang : QOnlineTranslator::validLanguageRegions().keys())
+            regions[lang] = regionSettings.value(QString::number(lang)).value<QLocale::Country>();
+        return regions;
+    }
     case QOnlineTranslator::Bing:
     case QOnlineTranslator::Yandex:
     case QOnlineTranslator::LibreTranslate:
     case QOnlineTranslator::Lingva:
-    case QOnlineTranslator::DeepLX:
         return {};
     default:
         Q_UNREACHABLE();
@@ -721,6 +728,15 @@ void AppSettings::setRegions(QOnlineTranslator::Engine engine, const QMap<QOnlin
         m_settings->setValue(QStringLiteral("TTS/GoogleRegions"), regionSettings);
         return;
     }
+    case QOnlineTranslator::DeepLX:
+    case QOnlineTranslator::DeepLXFree: { // Shared preference between the two, always saved under DeepLX's key
+        QMap<QString, QVariant> regionSettings;
+        for (auto it = regions.cbegin(); it != regions.cend(); ++it)
+            regionSettings[QString::number(it.key())] = it.value();
+
+        m_settings->setValue(QStringLiteral("Translation/DeepLRegions"), regionSettings);
+        return;
+    }
     default:
         Q_UNREACHABLE();
     }
@@ -735,6 +751,7 @@ QMap<QOnlineTranslator::Language, QLocale::Country> AppSettings::defaultRegions(
     case QOnlineTranslator::LibreTranslate:
     case QOnlineTranslator::Lingva:
     case QOnlineTranslator::DeepLX:
+    case QOnlineTranslator::DeepLXFree:
         return {};
     default:
         Q_UNREACHABLE();
