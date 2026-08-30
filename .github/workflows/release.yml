@@ -60,7 +60,7 @@ jobs:
         if: runner.os == 'Linux' && matrix.arch == 'amd64'
         run: |
           sudo apt-get update
-          sudo apt-get install extra-cmake-modules libqt5x11extras5-dev qttools5-dev qtmultimedia5-dev libkf5wayland-dev libtesseract-dev rpm qtgstreamer-plugins-qt5 gstreamer1.0-plugins-good gstreamer1.0-alsa gstreamer1.0-pulseaudio libqt5multimedia5-plugins qt5-style-plugins ninja-build fcitx5-frontend-qt5 libfcitx5-qt1 fcitx-frontend-qt5
+          sudo apt-get install extra-cmake-modules libqt5x11extras5-dev qttools5-dev qtmultimedia5-dev libkf5wayland-dev libtesseract-dev rpm qtgstreamer-plugins-qt5 gstreamer1.0-plugins-good gstreamer1.0-alsa gstreamer1.0-pulseaudio libqt5multimedia5-plugins qt5-style-plugins ninja-build fcitx5-frontend-qt5 libfcitx5-qt1 fcitx-frontend-qt5 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
           sudo apt-get remove qt5-gtk-platformtheme # Do not use libqgtk3.so because of https://bugreports.qt.io/browse/QTBUG-72506
 
       - name: Install linuxdeploy
