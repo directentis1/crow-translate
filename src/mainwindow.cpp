@@ -73,6 +73,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_closeWindowsShortcut(new QShortcut(this))
     , m_stateMachine(new QStateMachine(this))
     , m_translator(new QOnlineTranslator(this))
+    , m_reverseTranslator(new QOnlineTranslator(this))
     , m_trayIcon(new TrayIcon(this))
     , m_taskbar(new QTaskbarControl(this))
     , m_ocr(new Ocr(this))
@@ -136,6 +137,17 @@ MainWindow::MainWindow(QWidget *parent)
     ui->sourceSpeakButtons->setMediaPlayer(new QMediaPlayer);
     ui->translationSpeakButtons->setMediaPlayer(new QMediaPlayer);
 
+    // Reverse translation (optional quality check: translate the translation back into the
+    // source language with the same engine). Only the plain translated text is needed, so skip
+    // the extras to keep it fast and simple.
+    m_reverseTranslator->setSourceTranslitEnabled(false);
+    m_reverseTranslator->setTranslationTranslitEnabled(false);
+    m_reverseTranslator->setSourceTranscriptionEnabled(false);
+    m_reverseTranslator->setTranslationOptionsEnabled(false);
+    m_reverseTranslator->setExamplesEnabled(false);
+    connect(m_reverseTranslator, &QOnlineTranslator::finished, this, &MainWindow::displayReverseTranslation);
+    ui->reverseTranslationGroupBox->setVisible(false);
+
     // State machine to handle translator signals async
     buildStateMachine();
     m_stateMachine->start();
@@ -166,6 +178,11 @@ const QComboBox *MainWindow::engineCombobox() const
 const TranslationEdit *MainWindow::translationEdit() const
 {
     return ui->translationEdit;
+}
+
+const QPlainTextEdit *MainWindow::reverseTranslationEdit() const
+{
+    return ui->reverseTranslationEdit;
 }
 
 const QToolButton *MainWindow::swapButton() const
@@ -295,6 +312,7 @@ void MainWindow::clearText()
 void MainWindow::cancelOperation()
 {
     m_translator->abort();
+    m_reverseTranslator->abort();
     m_ocr->cancel();
 }
 
@@ -374,11 +392,29 @@ void MainWindow::requestRetranslation()
     m_translator->translate(ui->sourceEdit->toSourceText(), currentEngine(), translationLang, m_translator->sourceLanguage());
 }
 
+// Translate the just-produced translation back into its source language with the same engine,
+// so the result can be compared against the original text to gauge translation quality.
+void MainWindow::requestReverseTranslation()
+{
+    m_reverseTranslator->translate(m_translator->translation(), currentEngine(), m_translator->sourceLanguage(), m_translator->translationLanguage());
+}
+
+void MainWindow::displayReverseTranslation()
+{
+    if (m_reverseTranslator->error() != QOnlineTranslator::NoError) {
+        ui->reverseTranslationEdit->setPlainText(m_reverseTranslator->errorString());
+        return;
+    }
+
+    ui->reverseTranslationEdit->setPlainText(m_reverseTranslator->translation());
+}
+
 void MainWindow::displayTranslation()
 {
     if (!ui->translationEdit->parseTranslationData(m_translator)) {
         // Reset language on translation "Auto" button
         ui->translationLanguagesWidget->setAutoLanguage(QOnlineTranslator::Auto);
+        ui->reverseTranslationEdit->clear();
         return;
     }
 
@@ -394,12 +430,18 @@ void MainWindow::displayTranslation()
     // If window mode is notification, send a notification including the translation result
     if (this->isHidden() && m_windowMode == AppSettings::Notification)
         m_trayIcon->showTranslationMessage(ui->translationEdit->toPlainText());
+
+    if (m_reverseTranslationEnabled)
+        requestReverseTranslation();
+    else
+        ui->reverseTranslationEdit->clear();
 }
 
 void MainWindow::clearTranslation()
 {
     ui->translationEdit->clearTranslation();
     ui->translationLanguagesWidget->setAutoLanguage(QOnlineTranslator::Auto);
+    ui->reverseTranslationEdit->clear();
 }
 
 void MainWindow::requestSourceLanguage()
@@ -1020,6 +1062,22 @@ void MainWindow::loadAppSettings()
     m_translator->setLanguageRegions(settings.regions(QOnlineTranslator::DeepLX)); // Shared by DeepLX and DeepLXFree
     ui->translationLanguagesWidget->setLanguageRegions(settings.regions(QOnlineTranslator::DeepLX));
     updateLanguageRegionsAvailability();
+
+    // Reverse translation uses the same engine as the main translation, so mirror the same
+    // self-hosted engine settings onto the second translator instance.
+    m_reverseTranslator->setEngineUrl(QOnlineTranslator::LibreTranslate, settings.engineUrl(QOnlineTranslator::LibreTranslate));
+    m_reverseTranslator->setEngineApiKey(QOnlineTranslator::LibreTranslate, settings.engineApiKey(QOnlineTranslator::LibreTranslate));
+    m_reverseTranslator->setEngineUrl(QOnlineTranslator::Lingva, settings.engineUrl(QOnlineTranslator::Lingva));
+    m_reverseTranslator->setEngineUrl(QOnlineTranslator::DeepLX, settings.engineUrl(QOnlineTranslator::DeepLX));
+    m_reverseTranslator->setEngineApiKey(QOnlineTranslator::DeepLX, settings.engineApiKey(QOnlineTranslator::DeepLX));
+    m_reverseTranslator->setLanguageRegions(settings.regions(QOnlineTranslator::DeepLX));
+
+    m_reverseTranslationEnabled = settings.isReverseTranslationEnabled();
+    ui->reverseTranslationGroupBox->setVisible(m_reverseTranslationEnabled);
+    if (m_reverseTranslationEnabled && !ui->translationEdit->toPlainText().isEmpty())
+        requestReverseTranslation(); // Settings was just turned on with an existing translation - fill it in right away
+    else if (!m_reverseTranslationEnabled)
+        ui->reverseTranslationEdit->clear();
 
     // OCR settings
     if (const QByteArray languages = settings.ocrLanguagesString(), path = settings.ocrLanguagesPath(); !m_ocr->init(languages, path, settings.tesseractParameters())) {

@@ -458,6 +458,21 @@ bool AppSettings::defaultSimplifySource()
     return false;
 }
 
+bool AppSettings::isReverseTranslationEnabled() const
+{
+    return m_settings->value(QStringLiteral("Translation/ReverseTranslationEnabled"), defaultReverseTranslationEnabled()).toBool();
+}
+
+void AppSettings::setReverseTranslationEnabled(bool enable)
+{
+    m_settings->setValue(QStringLiteral("Translation/ReverseTranslationEnabled"), enable);
+}
+
+bool AppSettings::defaultReverseTranslationEnabled()
+{
+    return false;
+}
+
 QOnlineTranslator::Language AppSettings::primaryLanguage() const
 {
     return m_settings->value(QStringLiteral("Translation/PrimaryLanguage"), defaultPrimaryLanguage()).value<QOnlineTranslator::Language>();

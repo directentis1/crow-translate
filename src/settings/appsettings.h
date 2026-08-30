@@ -189,6 +189,10 @@ public:
     void setSimplifySource(bool simplify);
     static bool defaultSimplifySource();
 
+    bool isReverseTranslationEnabled() const;
+    void setReverseTranslationEnabled(bool enable);
+    static bool defaultReverseTranslationEnabled();
+
     QOnlineTranslator::Language primaryLanguage() const;
     void setPrimaryLanguage(QOnlineTranslator::Language lang);
     static QOnlineTranslator::Language defaultPrimaryLanguage();

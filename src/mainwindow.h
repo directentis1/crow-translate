@@ -38,6 +38,7 @@ class TrayIcon;
 class QHotkey;
 class QTaskbarControl;
 class QComboBox;
+class QPlainTextEdit;
 class QShortcut;
 class QToolButton;
 
@@ -62,6 +63,7 @@ public:
     const QToolButton *copyTranslationButton() const;
     const QToolButton *copyAllTranslationButton() const;
     const TranslationEdit *translationEdit() const;
+    const QPlainTextEdit *reverseTranslationEdit() const;
     const LanguageButtonsWidget *sourceLanguageButtons() const;
     const LanguageButtonsWidget *translationLanguageButtons() const;
     const SpeakButtons *sourceSpeakButtons() const;
@@ -111,6 +113,9 @@ private slots:
     void requestRetranslation();
     void displayTranslation();
     void clearTranslation();
+
+    void requestReverseTranslation();
+    void displayReverseTranslation();
 
     void requestSourceLanguage();
     void parseSourceLanguage();
@@ -190,6 +195,7 @@ private:
 
     QStateMachine *m_stateMachine;
     QOnlineTranslator *m_translator;
+    QOnlineTranslator *m_reverseTranslator; // Independent translator for the optional reverse-translation quality check
     TrayIcon *m_trayIcon;
     QTaskbarControl *m_taskbar;
     Ocr *m_ocr;
@@ -210,6 +216,7 @@ private:
 
     bool m_forceSourceAutodetect;
     bool m_forceTranslationAutodetect;
+    bool m_reverseTranslationEnabled = false;
     bool m_listenForContentChanges = false;
 };
 

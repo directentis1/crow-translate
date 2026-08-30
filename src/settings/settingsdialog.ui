@@ -699,6 +699,16 @@
                  </property>
                 </widget>
                </item>
+               <item>
+                <widget class="QCheckBox" name="reverseTranslationCheckBox">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;After translating, translate the result back into the source language using the same engine and show it below the translation, so you can double-check the translation quality&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Show reverse translation</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </widget>
             </item>

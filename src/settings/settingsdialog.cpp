@@ -274,6 +274,7 @@ void SettingsDialog::accept()
     settings.setTranslationOptionsEnabled(ui->translationOptionsCheckBox->isChecked());
     settings.setExamplesEnabled(ui->examplesCheckBox->isChecked());
     settings.setSimplifySource(ui->sourceSimplificationCheckBox->isChecked());
+    settings.setReverseTranslationEnabled(ui->reverseTranslationCheckBox->isChecked());
     settings.setPrimaryLanguage(ui->primaryLangComboBox->currentData().value<QOnlineTranslator::Language>());
     settings.setSecondaryLanguage(ui->secondaryLangComboBox->currentData().value<QOnlineTranslator::Language>());
     settings.setForceSourceAutodetect(ui->forceSourceAutodetectCheckBox->isChecked());
@@ -626,6 +627,7 @@ void SettingsDialog::restoreDefaults()
     ui->translationOptionsCheckBox->setChecked(AppSettings::defaultTranslationOptionsEnabled());
     ui->examplesCheckBox->setChecked(AppSettings::defaultExamplesEnabled());
     ui->sourceSimplificationCheckBox->setChecked(AppSettings::defaultSimplifySource());
+    ui->reverseTranslationCheckBox->setChecked(AppSettings::defaultReverseTranslationEnabled());
     ui->primaryLangComboBox->setCurrentIndex(ui->primaryLangComboBox->findData(AppSettings::defaultPrimaryLanguage()));
     ui->secondaryLangComboBox->setCurrentIndex(ui->secondaryLangComboBox->findData(AppSettings::defaultSecondaryLanguage()));
     ui->forceSourceAutodetectCheckBox->setChecked(AppSettings::defaultForceSourceAutodetect());
@@ -744,6 +746,7 @@ void SettingsDialog::loadSettings()
     ui->translationOptionsCheckBox->setChecked(settings.isTranslationOptionsEnabled());
     ui->examplesCheckBox->setChecked(settings.isExamplesEnabled());
     ui->sourceSimplificationCheckBox->setChecked(settings.isSimplifySource());
+    ui->reverseTranslationCheckBox->setChecked(settings.isReverseTranslationEnabled());
     ui->primaryLangComboBox->setCurrentIndex(ui->primaryLangComboBox->findData(settings.primaryLanguage()));
     ui->secondaryLangComboBox->setCurrentIndex(ui->secondaryLangComboBox->findData(settings.secondaryLanguage()));
     ui->forceSourceAutodetectCheckBox->setChecked(settings.isForceSourceAutodetect());
