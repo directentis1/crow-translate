@@ -700,6 +700,7 @@ void MainWindow::setOrientation(Qt::ScreenOrientation orientation)
         ui->translationButtonsLayout->setDirection(QBoxLayout::LeftToRight);
         ui->reverseTranslationButtonsLayout->setDirection(QBoxLayout::LeftToRight);
         ui->translationLanguagesWidget->setLayoutDirection(Qt::RightToLeft);
+        ui->reverseLanguageButtonsWidget->setLayoutDirection(Qt::RightToLeft);
         break;
     case Qt::PortraitOrientation:
         ui->centralLayout->setDirection(QBoxLayout::TopToBottom);
