@@ -20,12 +20,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "languagebuttonswidget.h"
 #include "popupwindow.h"
 #include "qhotkey.h"
 #include "qtaskbarcontrol.h"
 #include "screenwatcher.h"
 #include "selection.h"
-#include "languagebuttonswidget.h"
 #include "singleapplication.h"
 #include "trayicon.h"
 #include "ocr/ocr.h"
@@ -698,16 +698,19 @@ void MainWindow::setOrientation(Qt::ScreenOrientation orientation)
     case Qt::InvertedLandscapeOrientation:
         ui->centralLayout->setDirection(QBoxLayout::LeftToRight);
         ui->translationButtonsLayout->setDirection(QBoxLayout::LeftToRight);
+        ui->reverseTranslationButtonsLayout->setDirection(QBoxLayout::LeftToRight);
         ui->translationLanguagesWidget->setLayoutDirection(Qt::RightToLeft);
         break;
     case Qt::PortraitOrientation:
         ui->centralLayout->setDirection(QBoxLayout::TopToBottom);
         ui->translationButtonsLayout->setDirection(QBoxLayout::RightToLeft);
+        ui->reverseTranslationButtonsLayout->setDirection(QBoxLayout::RightToLeft);
         ui->translationLanguagesWidget->setLayoutDirection(Qt::LeftToRight);
         break;
     case Qt::InvertedPortraitOrientation:
         ui->centralLayout->setDirection(QBoxLayout::BottomToTop);
         ui->translationButtonsLayout->setDirection(QBoxLayout::RightToLeft);
+        ui->reverseTranslationButtonsLayout->setDirection(QBoxLayout::RightToLeft);
         ui->translationLanguagesWidget->setLayoutDirection(Qt::LeftToRight);
         break;
     default:
@@ -1272,7 +1275,7 @@ void MainWindow::repositionEngineControls(bool reverseEnabled)
         ui->translationButtonsLayout->removeWidget(ui->engineComboBox);
         ui->translationButtonsLayout->removeWidget(ui->settingsButton);
         ui->reverseTranslationButtonsLayout->insertWidget(1, ui->engineComboBox); // Right after the spacer
-        ui->reverseTranslationButtonsLayout->insertWidget(2, ui->settingsButton);
+        ui->reverseTranslationButtonsLayout->addWidget(ui->settingsButton);
     } else {
         ui->reverseTranslationButtonsLayout->removeWidget(ui->engineComboBox);
         ui->reverseTranslationButtonsLayout->removeWidget(ui->settingsButton);
