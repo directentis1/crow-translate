@@ -707,12 +707,14 @@ void MainWindow::setOrientation(Qt::ScreenOrientation orientation)
         ui->translationButtonsLayout->setDirection(QBoxLayout::RightToLeft);
         ui->reverseTranslationButtonsLayout->setDirection(QBoxLayout::RightToLeft);
         ui->translationLanguagesWidget->setLayoutDirection(Qt::LeftToRight);
+        ui->reverseLanguageButtonsWidget->setLayoutDirection(Qt::LeftToRight);
         break;
     case Qt::InvertedPortraitOrientation:
         ui->centralLayout->setDirection(QBoxLayout::BottomToTop);
         ui->translationButtonsLayout->setDirection(QBoxLayout::RightToLeft);
         ui->reverseTranslationButtonsLayout->setDirection(QBoxLayout::RightToLeft);
         ui->translationLanguagesWidget->setLayoutDirection(Qt::LeftToRight);
+        ui->reverseLanguageButtonsWidget->setLayoutDirection(Qt::LeftToRight);
         break;
     default:
         Q_UNREACHABLE(); // Will never be called with Qt::PrimaryOrientation
