@@ -152,15 +152,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_reverseTranslator, &QOnlineTranslator::finished, this, &MainWindow::displayReverseTranslation);
     ui->reverseTranslationGroupBox->setVisible(false);
 
-    // Reverse translation target language picker: "Auto" (default) mirrors whatever the source
-    // language of the main translation turns out to be; the user can otherwise pick any language
-    // to reverse-translate into instead, as a 3rd language.
-    ui->reverseLanguageComboBox->addItem(tr("Auto"), QOnlineTranslator::Auto);
-    for (int i = 1; i <= QOnlineTranslator::Zulu; ++i) {
-        const auto lang = static_cast<QOnlineTranslator::Language>(i);
-        ui->reverseLanguageComboBox->addItem(LanguageButtonsWidget::countryIcon(lang), QOnlineTranslator::languageName(lang), i);
-    }
-    connect(ui->reverseLanguageComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &MainWindow::requestReverseTranslation);
+    // Reverse translation target language bar: "Auto" (default, already checked by
+    // LanguageButtonsWidget itself) mirrors whatever the source language of the main translation
+    // turns out to be; the user can otherwise pin and pick any language(s) to reverse-translate
+    // into instead, via "Edit languages", exactly like the source/translation bars.
+    connect(ui->reverseLanguageButtonsWidget, &LanguageButtonsWidget::buttonChecked, this, &MainWindow::requestReverseTranslation);
 
     // Enable/disable the reverse box's own speak button based on whether it has any text, same
     // as sourceEdit/translationEdit do for their speak buttons via sourceEmpty()/translationEmpty()
@@ -184,8 +180,10 @@ MainWindow::~MainWindow()
     settings.setCurrentEngine(currentEngine());
     settings.setLanguages(AppSettings::Source, ui->sourceLanguagesWidget->languages());
     settings.setLanguages(AppSettings::Translation, ui->translationLanguagesWidget->languages());
+    settings.setLanguages(AppSettings::Reverse, ui->reverseLanguageButtonsWidget->languages());
     settings.setCheckedButton(AppSettings::Source, ui->sourceLanguagesWidget->checkedId());
     settings.setCheckedButton(AppSettings::Translation, ui->translationLanguagesWidget->checkedId());
+    settings.setCheckedButton(AppSettings::Reverse, ui->reverseLanguageButtonsWidget->checkedId());
     delete ui;
 }
 
@@ -249,9 +247,9 @@ const SpeakButtons *MainWindow::reverseSpeakButtons() const
     return ui->reverseSpeakButtons;
 }
 
-const QComboBox *MainWindow::reverseLanguageComboBox() const
+const LanguageButtonsWidget *MainWindow::reverseLanguageButtonsWidget() const
 {
-    return ui->reverseLanguageComboBox;
+    return ui->reverseLanguageButtonsWidget;
 }
 
 const QToolButton *MainWindow::copyReverseTranslationButton() const
@@ -430,15 +428,16 @@ void MainWindow::requestRetranslation()
 
 // Translate the just-produced translation back into its source language with the same engine,
 // so the result can be compared against the original text to gauge translation quality. The user
-// can override the target via reverseLanguageComboBox; "Auto" (the default) keeps mirroring
+// can override the target via reverseLanguageButtonsWidget; "Auto" (the default) keeps mirroring
 // whatever the source language of the main translation is.
 void MainWindow::requestReverseTranslation()
 {
     if (!m_reverseTranslationEnabled || ui->translationEdit->toPlainText().isEmpty())
         return;
 
-    const auto pickedLang = static_cast<QOnlineTranslator::Language>(ui->reverseLanguageComboBox->currentData().toInt());
-    const QOnlineTranslator::Language reverseLang = pickedLang == QOnlineTranslator::Auto ? m_translator->sourceLanguage() : pickedLang;
+    const QOnlineTranslator::Language reverseLang = ui->reverseLanguageButtonsWidget->isAutoButtonChecked()
+        ? m_translator->sourceLanguage()
+        : ui->reverseLanguageButtonsWidget->checkedLanguage();
 
     m_reverseTranslator->translate(m_translator->translation(), currentEngine(), reverseLang, m_translator->translationLanguage());
 }
@@ -451,6 +450,12 @@ void MainWindow::displayReverseTranslation()
     }
 
     ui->reverseTranslationEdit->setPlainText(m_reverseTranslator->translation());
+
+    // Same "show what Auto actually resolved to" behavior as translationLanguagesWidget
+    if (ui->reverseLanguageButtonsWidget->isAutoButtonChecked())
+        ui->reverseLanguageButtonsWidget->setAutoLanguage(m_reverseTranslator->translationLanguage());
+    else
+        ui->reverseLanguageButtonsWidget->setAutoLanguage(QOnlineTranslator::Auto);
 }
 
 void MainWindow::speakReverseTranslation()
@@ -1047,8 +1052,10 @@ void MainWindow::loadMainWindowSettings()
     ui->engineComboBox->setCurrentIndex(settings.currentEngine());
     ui->sourceLanguagesWidget->setLanguages(settings.languages(AppSettings::Source));
     ui->translationLanguagesWidget->setLanguages(settings.languages(AppSettings::Translation));
+    ui->reverseLanguageButtonsWidget->setLanguages(settings.languages(AppSettings::Reverse));
     ui->translationLanguagesWidget->checkButton(settings.checkedButton(AppSettings::Translation));
     ui->sourceLanguagesWidget->checkButton(settings.checkedButton(AppSettings::Source));
+    ui->reverseLanguageButtonsWidget->checkButton(settings.checkedButton(AppSettings::Reverse));
 
     restoreGeometry(settings.mainWindowGeometry());
     if (!settings.isShowTrayIcon() || !settings.isStartMinimized()) {
@@ -1098,6 +1105,7 @@ void MainWindow::loadAppSettings()
 
     ui->sourceLanguagesWidget->setLanguageFormat(settings.mainWindowLanguageFormat());
     ui->translationLanguagesWidget->setLanguageFormat(settings.mainWindowLanguageFormat());
+    ui->reverseLanguageButtonsWidget->setLanguageFormat(settings.mainWindowLanguageFormat());
 
     if (const AppSettings::IconType iconType = settings.trayIconType(); iconType == AppSettings::CustomIcon) {
         const QString customIconPath = settings.customIconPath();
@@ -1251,7 +1259,7 @@ void MainWindow::repositionEngineControls(bool reverseEnabled)
     } else {
         ui->reverseBottomControlsLayout->removeWidget(ui->engineComboBox);
         ui->reverseBottomControlsLayout->removeWidget(ui->settingsButton);
-        ui->translationButtonsLayout->insertWidget(1, ui->engineComboBox); // Right after the spacer, its original spot
+        ui->translationButtonsLayout->insertWidget(3, ui->engineComboBox); // Right after delayedTranslateScreenAreaButton/copyAllTranslationButton, its original spot
         ui->translationButtonsLayout->addWidget(ui->settingsButton); // Originally the last (rightmost) button
     }
     ui->reverseBottomControlsWidget->setVisible(reverseEnabled);

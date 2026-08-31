@@ -69,7 +69,7 @@ public:
     const SpeakButtons *sourceSpeakButtons() const;
     const SpeakButtons *translationSpeakButtons() const;
     const SpeakButtons *reverseSpeakButtons() const;
-    const QComboBox *reverseLanguageComboBox() const;
+    const LanguageButtonsWidget *reverseLanguageButtonsWidget() const;
     const QToolButton *copyReverseTranslationButton() const;
     QKeySequence closeWindowShortcut() const;
     Ocr *ocr() const;

@@ -171,6 +171,15 @@
        </widget>
       </item>
       <item>
+       <!-- Insertion order here is deliberate: MainWindow::setOrientation() flips this layout's
+            direction (LeftToRight for landscape, RightToLeft for portrait). Composite widgets
+            (like SpeakButtons, which bundles its own speak/pause + stop buttons) always keep
+            their internal order regardless of the flip, since the flip only reorders top-level
+            layout items, not what's inside them. With the order below:
+             - landscape (LeftToRight): engine, speak/pause, stop, copy, settings (settings = far right)
+             - portrait (RightToLeft): settings, copy, speak/pause, stop, engine (settings = far left)
+            delayedTranslateScreenAreaButton/copyAllTranslationButton aren't part of that named
+            sequence, so they sit just outside it, on the engine side, in both orientations. -->
        <layout class="QHBoxLayout" name="translationButtonsLayout">
         <item>
          <spacer name="translationButtonsSpacer">
@@ -184,6 +193,28 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QToolButton" name="delayedTranslateScreenAreaButton">
+          <property name="toolTip">
+           <string>Translate screen area with delay</string>
+          </property>
+          <property name="icon">
+           <iconset theme="transform-crop">
+            <normaloff>.</normaloff>.</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="copyAllTranslationButton">
+          <property name="toolTip">
+           <string>Copy all translation data to the clipboard</string>
+          </property>
+          <property name="icon">
+           <iconset theme="edit-select-all">
+            <normaloff>.</normaloff>.</iconset>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QComboBox" name="engineComboBox">
@@ -277,28 +308,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="copyAllTranslationButton">
-          <property name="toolTip">
-           <string>Copy all translation data to the clipboard</string>
-          </property>
-          <property name="icon">
-           <iconset theme="edit-select-all">
-            <normaloff>.</normaloff>.</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="delayedTranslateScreenAreaButton">
-          <property name="toolTip">
-           <string>Translate screen area with delay</string>
-          </property>
-          <property name="icon">
-           <iconset theme="transform-crop">
-            <normaloff>.</normaloff>.</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QToolButton" name="settingsButton">
           <property name="toolTip">
            <string>Application settings</string>
@@ -312,26 +321,33 @@
        </layout>
       </item>
       <item>
-       <widget class="QGroupBox" name="reverseTranslationGroupBox">
-        <property name="title">
-         <string notr="true"/>
-        </property>
+       <!-- Plain QWidget (not QGroupBox) with zero margins, so it has no frame/border and its
+            children span exactly the same width as translationLanguagesWidget/translationEdit
+            above - lining up flush with them instead of looking like a boxed-in sub-panel. -->
+       <widget class="QWidget" name="reverseTranslationGroupBox" native="true">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The translation above, translated back into the source language with the same engine, to help judge translation quality&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <layout class="QVBoxLayout" name="reverseTranslationLayout">
          <property name="leftMargin">
-          <number>6</number>
+          <number>0</number>
          </property>
          <property name="topMargin">
-          <number>6</number>
+          <number>0</number>
          </property>
          <property name="rightMargin">
-          <number>6</number>
+          <number>0</number>
          </property>
          <property name="bottomMargin">
-          <number>6</number>
+          <number>0</number>
          </property>
+         <item>
+          <widget class="LanguageButtonsWidget" name="reverseLanguageButtonsWidget" native="true">
+           <property name="toolTip">
+            <string>Language(s) to translate the reverse translation into. "Auto" mirrors the source language.</string>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QPlainTextEdit" name="reverseTranslationEdit">
            <property name="tabChangesFocus">
@@ -359,19 +375,6 @@
               </size>
              </property>
             </spacer>
-           </item>
-           <item>
-            <widget class="QComboBox" name="reverseLanguageComboBox">
-             <property name="toolTip">
-              <string>Language to translate the reverse translation into. "Auto" mirrors the source language.</string>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>1</width>
-               <height>1</height>
-              </size>
-             </property>
-            </widget>
            </item>
            <item>
             <widget class="SpeakButtons" name="reverseSpeakButtons" native="true">
@@ -484,7 +487,6 @@
   <tabstop>engineComboBox</tabstop>
   <tabstop>copyTranslationButton</tabstop>
   <tabstop>copyAllTranslationButton</tabstop>
-  <tabstop>reverseLanguageComboBox</tabstop>
   <tabstop>copyReverseTranslationButton</tabstop>
   <tabstop>settingsButton</tabstop>
  </tabstops>

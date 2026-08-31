@@ -43,7 +43,8 @@ public:
 
     enum LanguageButtonsType {
         Source,
-        Translation
+        Translation,
+        Reverse
     };
     Q_ENUM(LanguageButtonsType)
 
