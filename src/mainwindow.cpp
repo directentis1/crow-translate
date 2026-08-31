@@ -20,12 +20,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "languagebuttonswidget.h"
 #include "popupwindow.h"
 #include "qhotkey.h"
 #include "qtaskbarcontrol.h"
 #include "screenwatcher.h"
 #include "selection.h"
-#include "languagebuttonswidget.h"
 #include "singleapplication.h"
 #include "trayicon.h"
 #include "ocr/ocr.h"
@@ -684,16 +684,19 @@ void MainWindow::setOrientation(Qt::ScreenOrientation orientation)
     case Qt::InvertedLandscapeOrientation:
         ui->centralLayout->setDirection(QBoxLayout::LeftToRight);
         ui->translationButtonsLayout->setDirection(QBoxLayout::LeftToRight);
+        ui->reverseBottomControlsLayout->setDirection(QBoxLayout::LeftToRight);
         ui->translationLanguagesWidget->setLayoutDirection(Qt::RightToLeft);
         break;
     case Qt::PortraitOrientation:
         ui->centralLayout->setDirection(QBoxLayout::TopToBottom);
         ui->translationButtonsLayout->setDirection(QBoxLayout::RightToLeft);
+        ui->reverseBottomControlsLayout->setDirection(QBoxLayout::RightToLeft);
         ui->translationLanguagesWidget->setLayoutDirection(Qt::LeftToRight);
         break;
     case Qt::InvertedPortraitOrientation:
         ui->centralLayout->setDirection(QBoxLayout::BottomToTop);
         ui->translationButtonsLayout->setDirection(QBoxLayout::RightToLeft);
+        ui->reverseBottomControlsLayout->setDirection(QBoxLayout::RightToLeft);
         ui->translationLanguagesWidget->setLayoutDirection(Qt::LeftToRight);
         break;
     default:
@@ -1244,26 +1247,47 @@ void MainWindow::loadAppSettings()
     m_closeWindowsShortcut->setKey(settings.closeWindowShortcut());
 }
 
-// Moves engineComboBox and settingsButton out of translationButtonsLayout (their usual home,
-// directly under translationEdit) and into reverseBottomControlsLayout (below the reverse
-// translation box) when reverse translation is shown, and back again when it's hidden. Qt
+// Moves engineComboBox/translationSpeakButtons/copyTranslationButton/settingsButton out of
+// translationButtonsLayout (their usual home, directly under translationEdit) and into
+// reverseBottomControlsLayout (below the reverse translation box) as one single row when reverse
+// translation is shown, and back again (at their original spots) when it's hidden. Qt
 // automatically reparents a widget to a new layout's parent widget when it's added there, so no
 // manual setParent() calls are needed - just remove from one layout and insert into the other.
+//
+// Insertion order into reverseBottomControlsLayout is deliberate: setOrientation() flips that
+// layout's direction the same way it does translationButtonsLayout (LeftToRight for landscape,
+// RightToLeft for portrait). translationSpeakButtons is one composite widget (it bundles its own
+// speak/pause + stop buttons internally), so that internal order never changes with the flip -
+// only its position as a whole item does. With engine, translationSpeakButtons,
+// copyTranslationButton, settingsButton inserted in that order:
+//  - landscape (LeftToRight): engine, speak/pause, stop, copy, settings (settings = far right)
+//  - portrait (RightToLeft): settings, copy, speak/pause, stop, engine (settings = far left)
 void MainWindow::repositionEngineControls(bool reverseEnabled)
 {
     if (reverseEnabled) {
         ui->translationButtonsLayout->removeWidget(ui->engineComboBox);
+        ui->translationButtonsLayout->removeWidget(ui->translationSpeakButtons);
+        ui->translationButtonsLayout->removeWidget(ui->copyTranslationButton);
         ui->translationButtonsLayout->removeWidget(ui->settingsButton);
         ui->reverseBottomControlsLayout->insertWidget(1, ui->engineComboBox);
-        ui->reverseBottomControlsLayout->insertWidget(2, ui->settingsButton);
+        ui->reverseBottomControlsLayout->insertWidget(2, ui->translationSpeakButtons);
+        ui->reverseBottomControlsLayout->insertWidget(3, ui->copyTranslationButton);
+        ui->reverseBottomControlsLayout->insertWidget(4, ui->settingsButton);
     } else {
         ui->reverseBottomControlsLayout->removeWidget(ui->engineComboBox);
+        ui->reverseBottomControlsLayout->removeWidget(ui->translationSpeakButtons);
+        ui->reverseBottomControlsLayout->removeWidget(ui->copyTranslationButton);
         ui->reverseBottomControlsLayout->removeWidget(ui->settingsButton);
-        ui->translationButtonsLayout->insertWidget(3, ui->engineComboBox); // Right after delayedTranslateScreenAreaButton/copyAllTranslationButton, its original spot
+        // Restore original order: spacer, engine, speakButtons, copy, copyAll, delayed, settings
+        ui->translationButtonsLayout->insertWidget(1, ui->engineComboBox);
+        ui->translationButtonsLayout->insertWidget(2, ui->translationSpeakButtons);
+        ui->translationButtonsLayout->insertWidget(3, ui->copyTranslationButton);
         ui->translationButtonsLayout->addWidget(ui->settingsButton); // Originally the last (rightmost) button
     }
     ui->reverseBottomControlsWidget->setVisible(reverseEnabled);
     ui->engineComboBox->show();
+    ui->translationSpeakButtons->show();
+    ui->copyTranslationButton->show();
     ui->settingsButton->show();
 }
 

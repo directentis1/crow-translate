@@ -171,15 +171,11 @@
        </widget>
       </item>
       <item>
-       <!-- Insertion order here is deliberate: MainWindow::setOrientation() flips this layout's
-            direction (LeftToRight for landscape, RightToLeft for portrait). Composite widgets
-            (like SpeakButtons, which bundles its own speak/pause + stop buttons) always keep
-            their internal order regardless of the flip, since the flip only reorders top-level
-            layout items, not what's inside them. With the order below:
-             - landscape (LeftToRight): engine, speak/pause, stop, copy, settings (settings = far right)
-             - portrait (RightToLeft): settings, copy, speak/pause, stop, engine (settings = far left)
-            delayedTranslateScreenAreaButton/copyAllTranslationButton aren't part of that named
-            sequence, so they sit just outside it, on the engine side, in both orientations. -->
+       <!-- Insertion order matters here for two reasons: MainWindow::setOrientation() flips this
+            layout's direction (LeftToRight for landscape, RightToLeft for portrait), and
+            MainWindow::repositionEngineControls() moves engineComboBox/translationSpeakButtons/
+            copyTranslationButton/settingsButton out to reverseBottomControlsLayout while reverse
+            translation is shown, then back here (at their original slots below) once it's hidden. -->
        <layout class="QHBoxLayout" name="translationButtonsLayout">
         <item>
          <spacer name="translationButtonsSpacer">
@@ -193,28 +189,6 @@
            </size>
           </property>
          </spacer>
-        </item>
-        <item>
-         <widget class="QToolButton" name="delayedTranslateScreenAreaButton">
-          <property name="toolTip">
-           <string>Translate screen area with delay</string>
-          </property>
-          <property name="icon">
-           <iconset theme="transform-crop">
-            <normaloff>.</normaloff>.</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="copyAllTranslationButton">
-          <property name="toolTip">
-           <string>Copy all translation data to the clipboard</string>
-          </property>
-          <property name="icon">
-           <iconset theme="edit-select-all">
-            <normaloff>.</normaloff>.</iconset>
-          </property>
-         </widget>
         </item>
         <item>
          <widget class="QComboBox" name="engineComboBox">
@@ -303,6 +277,28 @@
           </property>
           <property name="icon">
            <iconset theme="edit-copy">
+            <normaloff>.</normaloff>.</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="copyAllTranslationButton">
+          <property name="toolTip">
+           <string>Copy all translation data to the clipboard</string>
+          </property>
+          <property name="icon">
+           <iconset theme="edit-select-all">
+            <normaloff>.</normaloff>.</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="delayedTranslateScreenAreaButton">
+          <property name="toolTip">
+           <string>Translate screen area with delay</string>
+          </property>
+          <property name="icon">
+           <iconset theme="transform-crop">
             <normaloff>.</normaloff>.</iconset>
           </property>
          </widget>
