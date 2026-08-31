@@ -171,11 +171,10 @@
        </widget>
       </item>
       <item>
-       <!-- Insertion order matters here for two reasons: MainWindow::setOrientation() flips this
-            layout's direction (LeftToRight for landscape, RightToLeft for portrait), and
-            MainWindow::repositionEngineControls() moves engineComboBox/translationSpeakButtons/
-            copyTranslationButton/settingsButton out to reverseBottomControlsLayout while reverse
-            translation is shown, then back here (at their original slots below) once it's hidden. -->
+       <!-- Insertion order matters here: MainWindow::repositionEngineControls() moves
+            engineComboBox/settingsButton out to reverseTranslationButtonsLayout (inside the
+            reverse translation box) while reverse translation is shown, then back here (at
+            their original spots below) once it's hidden. -->
        <layout class="QHBoxLayout" name="translationButtonsLayout">
         <item>
          <spacer name="translationButtonsSpacer">
@@ -391,40 +390,6 @@
             </widget>
            </item>
           </layout>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QWidget" name="reverseBottomControlsWidget" native="true">
-        <property name="visible">
-         <bool>false</bool>
-        </property>
-        <layout class="QHBoxLayout" name="reverseBottomControlsLayout">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <spacer name="reverseBottomControlsSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </widget>
