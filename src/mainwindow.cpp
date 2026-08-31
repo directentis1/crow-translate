@@ -123,6 +123,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Regional variants (DeepLX/DeepLXFree targets only) - picked via right-click on the target language button
     connect(ui->translationLanguagesWidget, &LanguageButtonsWidget::languageRegionChanged, this, &MainWindow::saveLanguageRegion);
+    connect(ui->reverseLanguageButtonsWidget, &LanguageButtonsWidget::languageRegionChanged, this, &MainWindow::saveLanguageRegion);
     connect(ui->engineComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &MainWindow::updateLanguageRegionsAvailability);
 
     // OCR logic
@@ -524,14 +525,21 @@ void MainWindow::parseSourceLanguage()
     ui->sourceLanguagesWidget->setAutoLanguage(m_translator->sourceLanguage());
 }
 
-// Only DeepLX/DeepLXFree support translating into a specific regional variant
+// Only DeepLX/DeepLXFree support translating into a specific regional variant. The reverse
+// translator always uses the same engine as the main translator (see requestReverseTranslation()),
+// so both language bars' availability tracks the same currentEngine() check.
 void MainWindow::updateLanguageRegionsAvailability()
 {
     const bool enabled = currentEngine() == QOnlineTranslator::DeepLX || currentEngine() == QOnlineTranslator::DeepLXFree;
     ui->translationLanguagesWidget->setLanguageRegionsEnabled(enabled);
+    ui->reverseLanguageButtonsWidget->setLanguageRegionsEnabled(enabled);
 }
 
-// Called when a regional variant is picked from the target language button's context menu
+// Called when a regional variant is picked from a target language button's context menu - either
+// the translation box's or the reverse translation box's, since both offer the same picker. The
+// region list itself is a single shared preference (keyed only by language, not by which box you
+// picked it from), so it's saved once and pushed to both translators and both language bars to
+// keep everything in sync.
 void MainWindow::saveLanguageRegion(QOnlineTranslator::Language lang, QLocale::Country country)
 {
     AppSettings settings;
@@ -543,8 +551,14 @@ void MainWindow::saveLanguageRegion(QOnlineTranslator::Language lang, QLocale::C
     settings.setRegions(QOnlineTranslator::DeepLX, regions); // Shared by DeepLX and DeepLXFree
 
     m_translator->setLanguageRegions(regions);
+    m_reverseTranslator->setLanguageRegions(regions);
+    ui->translationLanguagesWidget->setLanguageRegions(regions);
+    ui->reverseLanguageButtonsWidget->setLanguageRegions(regions);
 
-    markContentAsChanged(); // Re-translate with the newly selected regional variant
+    if (sender() == ui->reverseLanguageButtonsWidget)
+        requestReverseTranslation(); // Only the reverse target changed - no need to re-run the main translation too
+    else
+        markContentAsChanged(); // Re-translate with the newly selected regional variant (also refreshes the reverse translation, if shown)
 }
 
 void MainWindow::speakSource()
@@ -1142,6 +1156,7 @@ void MainWindow::loadAppSettings()
     m_translator->setEngineApiKey(QOnlineTranslator::DeepLX, settings.engineApiKey(QOnlineTranslator::DeepLX));
     m_translator->setLanguageRegions(settings.regions(QOnlineTranslator::DeepLX)); // Shared by DeepLX and DeepLXFree
     ui->translationLanguagesWidget->setLanguageRegions(settings.regions(QOnlineTranslator::DeepLX));
+    ui->reverseLanguageButtonsWidget->setLanguageRegions(settings.regions(QOnlineTranslator::DeepLX));
     updateLanguageRegionsAvailability();
 
     // Reverse translation uses the same engine as the main translation, so mirror the same
