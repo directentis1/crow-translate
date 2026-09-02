@@ -88,6 +88,9 @@ SettingsDialog::SettingsDialog(MainWindow *parent)
         case QOnlineTranslator::Yandex:
             iconFile = QStringLiteral(":/icons/engines/yandex.svg");
             break;
+        case QOnlineTranslator::Bing:
+            iconFile = QStringLiteral(":/icons/engines/bing.svg");
+            break;
         default:
             break;
         }
