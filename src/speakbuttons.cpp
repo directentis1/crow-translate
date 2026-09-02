@@ -151,16 +151,17 @@ void SpeakButtons::speak(const QString &text, QOnlineTranslator::Language lang, 
         return;
     }
 
-    m_onlineTts.setRegions(m_googleRegions);
+    QOnlineTts onlineTts;
+    onlineTts.setRegions(m_googleRegions);
 
-    m_onlineTts.generateUrls(text, engine, lang, voice(engine), emotion(engine));
-    if (m_onlineTts.error() != QOnlineTts::NoError) {
-        QMessageBox::critical(this, tr("Unable to generate URLs for TTS"), m_onlineTts.errorString());
+    onlineTts.generateUrls(text, engine, lang, voice(engine), emotion(engine));
+    if (onlineTts.error() != QOnlineTts::NoError) {
+        QMessageBox::critical(this, tr("Unable to generate URLs for TTS"), onlineTts.errorString());
         return;
     }
 
     // Use playlist to split long queries due engines limit
-    const QList<QMediaContent> media = m_onlineTts.media();
+    const QList<QMediaContent> media = onlineTts.media();
     playlist()->clear();
     playlist()->addMedia(media);
     m_mediaPlayer->play();
