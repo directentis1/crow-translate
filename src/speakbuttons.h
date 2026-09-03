@@ -80,6 +80,13 @@ private:
 
     Ui::SpeakButtons *ui;
     QMediaPlayer *m_mediaPlayer = nullptr;
+
+    // Kept as a persistent member (rather than a local variable created fresh in speak()) because
+    // Bing's TTS audio lives in temporary files owned by this object - see the m_bingAudioFiles
+    // comment in qonlinetts.h. A new instance per call would have its files deleted before
+    // QMediaPlayer got a chance to play them.
+    QOnlineTts m_onlineTts;
+
     QOnlineTts::Voice m_yandexVoice = QOnlineTts::NoVoice;
     QOnlineTts::Emotion m_yandexEmotion = QOnlineTts::NoEmotion;
     QMap<QOnlineTranslator::Language, QLocale::Country> m_googleRegions;
