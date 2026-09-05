@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - test-bing-tts
     paths-ignore:
       - '**.md'
       - '.github/workflows/release.yml'

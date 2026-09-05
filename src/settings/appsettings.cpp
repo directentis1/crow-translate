@@ -19,6 +19,7 @@
 
 #include "appsettings.h"
 
+#include "bingvoicecatalog.h"
 #include "cmake.h"
 #include "languagebuttonswidget.h"
 #include "trayicon.h"
@@ -771,6 +772,38 @@ QMap<QOnlineTranslator::Language, QLocale::Country> AppSettings::defaultRegions(
     default:
         Q_UNREACHABLE();
     }
+}
+
+QMap<QOnlineTranslator::Language, QString> AppSettings::bingVoicePreferences() const
+{
+    const auto voiceSettings(m_settings->value(QStringLiteral("TTS/BingVoices")).value<QMap<QString, QVariant>>());
+
+    // Read back the same way Google's regions() does: walk every language the catalog actually
+    // supports and look each one up by its display name, rather than trying to parse the stored
+    // keys back into a Language (QOnlineTranslator::language(QString) parses translation API
+    // codes, not display names, so it can't round-trip languageName()'s output).
+    QMap<QOnlineTranslator::Language, QString> voices;
+    for (const QOnlineTranslator::Language lang : BingVoiceCatalog::supportedLanguages()) {
+        const QString voiceName = voiceSettings.value(QOnlineTranslator::languageName(lang)).toString();
+        if (!voiceName.isEmpty())
+            voices[lang] = voiceName;
+    }
+
+    return voices;
+}
+
+void AppSettings::setBingVoicePreferences(const QMap<QOnlineTranslator::Language, QString> &voicePreferences)
+{
+    QMap<QString, QVariant> voiceSettings;
+    for (auto it = voicePreferences.cbegin(); it != voicePreferences.cend(); ++it)
+        voiceSettings[QOnlineTranslator::languageName(it.key())] = it.value();
+
+    m_settings->setValue(QStringLiteral("TTS/BingVoices"), voiceSettings);
+}
+
+QMap<QOnlineTranslator::Language, QString> AppSettings::defaultBingVoicePreferences()
+{
+    return {};
 }
 
 QOnlineTranslator::Engine AppSettings::ttsEngine() const

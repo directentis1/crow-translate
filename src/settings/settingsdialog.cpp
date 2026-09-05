@@ -20,6 +20,7 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 
+#include "bingvoicecatalog.h"
 #include "languagebuttonswidget.h"
 #include "mainwindow.h"
 #include "qhotkey.h"
@@ -35,12 +36,16 @@
 #endif
 
 #include <QDate>
+#include <QDialogButtonBox>
 #include <QFileDialog>
+#include <QLineEdit>
+#include <QListWidget>
 #include <QMessageBox>
 #include <QMetaEnum>
 #include <QScreen>
 #include <QSignalBlocker>
 #include <QStandardItemModel>
+#include <QVBoxLayout>
 
 SettingsDialog::SettingsDialog(MainWindow *parent)
     : QDialog(parent)
@@ -48,6 +53,7 @@ SettingsDialog::SettingsDialog(MainWindow *parent)
     , m_autostartManager(AbstractAutostartManager::createAutostartManager(this))
     , m_yandexTranslator(new QOnlineTranslator(this))
     , m_googleTranslator(new QOnlineTranslator(this))
+    , m_bingTranslator(new QOnlineTranslator(this))
 #ifdef WITH_PORTABLE_MODE
     , m_portableCheckbox(new QCheckBox(tr("Portable mode"), this))
 #endif
@@ -73,6 +79,10 @@ SettingsDialog::SettingsDialog(MainWindow *parent)
     ui->googlePlayerButtons->setMediaPlayer(new QMediaPlayer);
     connect(m_googleTranslator, &QOnlineTranslator::finished, this, &SettingsDialog::speakGoogleTestText);
 
+    ui->bingPlayerButtons->setMediaPlayer(new QMediaPlayer);
+    connect(m_bingTranslator, &QOnlineTranslator::finished, this, &SettingsDialog::speakBingTestText);
+    populateBingLanguageComboBox(); // Static curated list + "Other language..." - doesn't depend on settings
+
     // Speech engine: independent of the translation engine, so e.g. DeepLX/DeepLXFree can be
     // used to translate while any TTS-capable engine is used to actually speak the result.
     for (int i = 0; i <= QOnlineTranslator::DeepLXFree; ++i) {
@@ -87,6 +97,9 @@ SettingsDialog::SettingsDialog(MainWindow *parent)
             break;
         case QOnlineTranslator::Yandex:
             iconFile = QStringLiteral(":/icons/engines/yandex.svg");
+            break;
+        case QOnlineTranslator::Bing:
+            iconFile = QStringLiteral(":/icons/engines/bing.svg");
             break;
         default:
             break;
@@ -303,6 +316,7 @@ void SettingsDialog::accept()
     settings.setVoice(QOnlineTranslator::Yandex, ui->yandexPlayerButtons->voice(QOnlineTranslator::Yandex));
     settings.setEmotion(QOnlineTranslator::Yandex, ui->yandexPlayerButtons->emotion(QOnlineTranslator::Yandex));
     settings.setRegions(QOnlineTranslator::Google, ui->googlePlayerButtons->regions(QOnlineTranslator::Google));
+    settings.setBingVoicePreferences(m_bingVoicePreferences);
     settings.setTtsEngine(ui->speechEngineComboBox->currentData().value<QOnlineTranslator::Engine>());
 
     // Connection settings
@@ -368,6 +382,7 @@ void SettingsDialog::onSpeechEngineChanged(int index)
 
     ui->yandexSpeechGroupBox->setStyleSheet(engine == QOnlineTranslator::Yandex ? QStringLiteral("QGroupBox::title { font-weight: bold; }") : QString());
     ui->googleSpeechGroupBox->setStyleSheet(engine == QOnlineTranslator::Google ? QStringLiteral("QGroupBox::title { font-weight: bold; }") : QString());
+    ui->bingSpeechGroupBox->setStyleSheet(engine == QOnlineTranslator::Bing ? QStringLiteral("QGroupBox::title { font-weight: bold; }") : QString());
 }
 
 // Disable (enable) "Custom icon path" option
@@ -479,6 +494,208 @@ void SettingsDialog::detectGoogleTextLanguage()
 void SettingsDialog::speakGoogleTestText()
 {
     speakTestText(*m_googleTranslator, QOnlineTranslator::Google);
+}
+
+// One-time setup: a curated set of common languages, then a separator, then a sentinel
+// "Other language..." row (data = QOnlineTranslator::NoLanguage) that opens pickOtherBingLanguage()
+// instead of naming a real language. Doesn't depend on settings, so it only needs to run once.
+void SettingsDialog::populateBingLanguageComboBox()
+{
+    for (QOnlineTranslator::Language lang : BingVoiceCatalog::mainstreamLanguages())
+        ui->bingLanguageComboBox->addItem(LanguageButtonsWidget::countryIcon(lang), QOnlineTranslator::languageName(lang), lang);
+
+    ui->bingLanguageComboBox->insertSeparator(ui->bingLanguageComboBox->count());
+    ui->bingLanguageComboBox->addItem(tr("Other language..."), QOnlineTranslator::NoLanguage);
+}
+
+// Inserts `lang` just above the separator/"Other language..." row if it isn't already present
+// (e.g. picked via search, or restored from a previously saved preference), and returns its index.
+int SettingsDialog::ensureBingLanguageComboBoxItem(QOnlineTranslator::Language lang)
+{
+    const int existingIndex = ui->bingLanguageComboBox->findData(lang);
+    if (existingIndex != -1)
+        return existingIndex;
+
+    const int insertIndex = ui->bingLanguageComboBox->count() - 2; // Above "Other..." and its separator
+    ui->bingLanguageComboBox->insertItem(insertIndex, LanguageButtonsWidget::countryIcon(lang), QOnlineTranslator::languageName(lang), lang);
+    return insertIndex;
+}
+
+// Small search/pick dialog over every language Bing has at least one voice for. Built ad hoc
+// rather than as a .ui form since it's just a filter box over a list.
+QOnlineTranslator::Language SettingsDialog::pickOtherBingLanguage()
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Select language"));
+    dialog.resize(320, 420);
+
+    auto *layout = new QVBoxLayout(&dialog);
+
+    auto *searchEdit = new QLineEdit(&dialog);
+    searchEdit->setPlaceholderText(tr("Search language..."));
+    layout->addWidget(searchEdit);
+
+    auto *listWidget = new QListWidget(&dialog);
+    for (QOnlineTranslator::Language lang : BingVoiceCatalog::supportedLanguages()) {
+        auto *item = new QListWidgetItem(LanguageButtonsWidget::countryIcon(lang), QOnlineTranslator::languageName(lang), listWidget);
+        item->setData(Qt::UserRole, lang);
+    }
+    if (listWidget->count() != 0)
+        listWidget->setCurrentRow(0);
+    layout->addWidget(listWidget);
+
+    auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    layout->addWidget(buttonBox);
+    connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    connect(listWidget, &QListWidget::itemDoubleClicked, &dialog, &QDialog::accept);
+    connect(searchEdit, &QLineEdit::textChanged, listWidget, [listWidget](const QString &text) {
+        for (int i = 0; i < listWidget->count(); ++i)
+            listWidget->item(i)->setHidden(!listWidget->item(i)->text().contains(text, Qt::CaseInsensitive));
+    });
+
+    searchEdit->setFocus();
+    if (dialog.exec() != QDialog::Accepted)
+        return QOnlineTranslator::NoLanguage;
+
+    const QListWidgetItem *current = listWidget->currentItem();
+    if (current == nullptr || current->isHidden()) // Hidden = filtered out, shouldn't be selectable
+        return QOnlineTranslator::NoLanguage;
+
+    return current->data(Qt::UserRole).value<QOnlineTranslator::Language>();
+}
+
+void SettingsDialog::onBingLanguageSelectionChanged(int languageIndex)
+{
+    const auto lang = ui->bingLanguageComboBox->itemData(languageIndex).value<QOnlineTranslator::Language>();
+
+    if (lang == QOnlineTranslator::NoLanguage) {
+        // The sentinel "Other language..." row - open the search dialog instead of trying to
+        // configure a voice for it directly.
+        const QOnlineTranslator::Language picked = pickOtherBingLanguage();
+
+        const QSignalBlocker blocker(ui->bingLanguageComboBox); // avoid recursing back into this slot
+        if (picked == QOnlineTranslator::NoLanguage) {
+            ui->bingLanguageComboBox->setCurrentIndex(m_lastBingLanguageIndex); // cancelled - restore
+            return;
+        }
+
+        const int insertedIndex = ensureBingLanguageComboBoxItem(picked);
+        ui->bingLanguageComboBox->setCurrentIndex(insertedIndex);
+        m_lastBingLanguageIndex = insertedIndex;
+        loadBingVoicePreference(picked);
+        return;
+    }
+
+    m_lastBingLanguageIndex = languageIndex;
+    loadBingVoicePreference(lang);
+}
+
+// Rebuilds the region/gender/voice cascade for `lang`, restoring m_bingVoicePreferences[lang]
+// if one is set (and still recognized by BingVoiceCatalog).
+void SettingsDialog::loadBingVoicePreference(QOnlineTranslator::Language lang)
+{
+    const QString preferredVoice = m_bingVoicePreferences.value(lang);
+    QString preferredLocale, preferredGender;
+    BingVoiceCatalog::voiceInfo(lang, preferredVoice, preferredLocale, preferredGender); // leaves both empty on failure - fine, handled below
+
+    const QSignalBlocker blocker(ui->bingCountryComboBox); // rebuilding below must not itself trigger onBingCountrySelectionChanged()
+    ui->bingCountryComboBox->clear();
+    for (const BingVoiceCatalog::CountryVariant &variant : BingVoiceCatalog::countryVariants(lang))
+        ui->bingCountryComboBox->addItem(variant.countryName, variant.locale);
+
+    const int countryIndex = preferredLocale.isEmpty() ? 0 : qMax(0, ui->bingCountryComboBox->findData(preferredLocale));
+    ui->bingCountryComboBox->setCurrentIndex(countryIndex);
+    onBingCountrySelectionChanged(countryIndex); // QSignalBlocker above means this needs to be explicit
+}
+
+void SettingsDialog::onBingCountrySelectionChanged(int countryIndex)
+{
+    const auto lang = ui->bingLanguageComboBox->currentData().value<QOnlineTranslator::Language>();
+    const QString locale = ui->bingCountryComboBox->itemData(countryIndex).toString();
+
+    const QString preferredVoice = m_bingVoicePreferences.value(lang);
+    QString preferredLocale, preferredGender;
+    BingVoiceCatalog::voiceInfo(lang, preferredVoice, preferredLocale, preferredGender);
+
+    QVector<BingVoiceCatalog::VoiceInfo> voicesForLocale;
+    for (const BingVoiceCatalog::CountryVariant &variant : BingVoiceCatalog::countryVariants(lang)) {
+        if (variant.locale == locale) {
+            voicesForLocale = variant.voices;
+            break;
+        }
+    }
+
+    // Distinct genders on offer for this locale, in the catalog's Female-first order.
+    QStringList genders;
+    for (const BingVoiceCatalog::VoiceInfo &voice : voicesForLocale) {
+        if (!genders.contains(voice.gender))
+            genders.append(voice.gender);
+    }
+
+    const QSignalBlocker blocker(ui->bingGenderComboBox); // rebuilding below must not itself trigger onBingGenderSelectionChanged()
+    ui->bingGenderComboBox->clear();
+    for (const QString &gender : qAsConst(genders))
+        ui->bingGenderComboBox->addItem(gender == QLatin1String("Female") ? tr("Female") : tr("Male"), gender);
+
+    const int genderIndex = (locale == preferredLocale && !preferredGender.isEmpty()) ? qMax(0, ui->bingGenderComboBox->findData(preferredGender)) : 0;
+    ui->bingGenderComboBox->setCurrentIndex(genderIndex);
+    onBingGenderSelectionChanged(genderIndex); // QSignalBlocker above means this needs to be explicit
+}
+
+void SettingsDialog::onBingGenderSelectionChanged(int genderIndex)
+{
+    const auto lang = ui->bingLanguageComboBox->currentData().value<QOnlineTranslator::Language>();
+    const QString locale = ui->bingCountryComboBox->currentData().toString();
+    const QString gender = ui->bingGenderComboBox->itemData(genderIndex).toString();
+    const QString preferredVoice = m_bingVoicePreferences.value(lang);
+
+    QVector<BingVoiceCatalog::VoiceInfo> matchingVoices;
+    for (const BingVoiceCatalog::CountryVariant &variant : BingVoiceCatalog::countryVariants(lang)) {
+        if (variant.locale != locale)
+            continue;
+        for (const BingVoiceCatalog::VoiceInfo &voice : variant.voices) {
+            if (voice.gender == gender)
+                matchingVoices.append(voice);
+        }
+    }
+
+    const QSignalBlocker blocker(ui->bingVoiceComboBox); // rebuilding below must not itself trigger saveBingEngineVoice()
+    ui->bingVoiceComboBox->clear();
+    for (const BingVoiceCatalog::VoiceInfo &voice : qAsConst(matchingVoices)) {
+        QString label = voice.name;
+        if (label.startsWith(locale + QLatin1Char('-')))
+            label = label.mid(locale.size() + 1); // Trim the "xx-XX-" prefix, e.g. "AriaNeural"
+        ui->bingVoiceComboBox->addItem(label, voice.name);
+    }
+
+    const int voiceIndex = qMax(0, ui->bingVoiceComboBox->findData(preferredVoice));
+    ui->bingVoiceComboBox->setCurrentIndex(voiceIndex);
+    saveBingEngineVoice(voiceIndex); // persist whatever ends up selected, including the catalog default
+}
+
+void SettingsDialog::saveBingEngineVoice(int voiceIndex)
+{
+    const auto lang = ui->bingLanguageComboBox->currentData().value<QOnlineTranslator::Language>();
+    const QString voiceName = ui->bingVoiceComboBox->itemData(voiceIndex).toString();
+    if (lang == QOnlineTranslator::NoLanguage || voiceName.isEmpty())
+        return;
+
+    m_bingVoicePreferences[lang] = voiceName;
+
+    // Keep the live test-speech widget in sync, or "Speech test" would always hear
+    // BingVoiceCatalog's default voice instead of whatever was just picked above.
+    ui->bingPlayerButtons->setBingVoicePreferences(m_bingVoicePreferences);
+}
+
+void SettingsDialog::detectBingTextLanguage()
+{
+    detectTestTextLanguage(*m_bingTranslator, QOnlineTranslator::Bing);
+}
+
+void SettingsDialog::speakBingTestText()
+{
+    speakTestText(*m_bingTranslator, QOnlineTranslator::Bing);
 }
 
 void SettingsDialog::onDeeplLanguageSelectionChanged(int languageIndex)
@@ -658,6 +875,12 @@ void SettingsDialog::restoreDefaults()
     ui->yandexPlayerButtons->setVoice(QOnlineTranslator::Yandex, AppSettings::defaultVoice(QOnlineTranslator::Yandex));
     ui->yandexPlayerButtons->setEmotion(QOnlineTranslator::Yandex, AppSettings::defaultEmotion(QOnlineTranslator::Yandex));
     ui->googlePlayerButtons->setRegions(QOnlineTranslator::Google, AppSettings::defaultRegions(QOnlineTranslator::Google));
+    m_bingVoicePreferences = AppSettings::defaultBingVoicePreferences();
+    if (ui->bingLanguageComboBox->count() != 0) {
+        ui->bingLanguageComboBox->setCurrentIndex(0);
+        m_lastBingLanguageIndex = 0;
+        loadBingVoicePreference(ui->bingLanguageComboBox->currentData().value<QOnlineTranslator::Language>());
+    }
     ui->speechEngineComboBox->setCurrentIndex(ui->speechEngineComboBox->findData(AppSettings::defaultTtsEngine()));
     onSpeechEngineChanged(ui->speechEngineComboBox->currentIndex());
 
@@ -777,6 +1000,14 @@ void SettingsDialog::loadSettings()
     ui->yandexPlayerButtons->setVoice(QOnlineTranslator::Yandex, settings.voice(QOnlineTranslator::Yandex));
     ui->yandexPlayerButtons->setEmotion(QOnlineTranslator::Yandex, settings.emotion(QOnlineTranslator::Yandex));
     ui->googlePlayerButtons->setRegions(QOnlineTranslator::Google, settings.regions(QOnlineTranslator::Google));
+    m_bingVoicePreferences = settings.bingVoicePreferences();
+    for (auto it = m_bingVoicePreferences.cbegin(); it != m_bingVoicePreferences.cend(); ++it)
+        ensureBingLanguageComboBoxItem(it.key()); // Restore any non-mainstream language the user previously configured
+    if (ui->bingLanguageComboBox->count() != 0) {
+        ui->bingLanguageComboBox->setCurrentIndex(0);
+        m_lastBingLanguageIndex = 0;
+        loadBingVoicePreference(ui->bingLanguageComboBox->currentData().value<QOnlineTranslator::Language>());
+    }
     ui->speechEngineComboBox->setCurrentIndex(ui->speechEngineComboBox->findData(settings.ttsEngine()));
     onSpeechEngineChanged(ui->speechEngineComboBox->currentIndex());
 
@@ -800,7 +1031,20 @@ void SettingsDialog::loadSettings()
 
 void SettingsDialog::detectTestTextLanguage(QOnlineTranslator &translator, QOnlineTranslator::Engine engine)
 {
-    const QString &testText = ((engine == QOnlineTranslator::Yandex) ? ui->yandexTestSpeechEdit->text() : ui->googleTestSpeechEdit->text()); // There are now only two engines
+    QString testText;
+    switch (engine) {
+    case QOnlineTranslator::Yandex:
+        testText = ui->yandexTestSpeechEdit->text();
+        break;
+    case QOnlineTranslator::Google:
+        testText = ui->googleTestSpeechEdit->text();
+        break;
+    case QOnlineTranslator::Bing:
+        testText = ui->bingTestSpeechEdit->text();
+        break;
+    default:
+        Q_UNREACHABLE(); // Only TTS-capable engines with a test-speech row call this
+    }
 
     if (testText.isEmpty()) {
         QMessageBox::information(this, tr("Nothing to play"), tr("Playback text is empty"));
@@ -817,10 +1061,17 @@ void SettingsDialog::speakTestText(QOnlineTranslator &translator, QOnlineTransla
         return;
     }
 
-    if (engine == QOnlineTranslator::Yandex)
+    switch (engine) {
+    case QOnlineTranslator::Yandex:
         ui->yandexPlayerButtons->speak(ui->yandexTestSpeechEdit->text(), translator.sourceLanguage(), QOnlineTranslator::Yandex);
-    else if (engine == QOnlineTranslator::Google)
+        break;
+    case QOnlineTranslator::Google:
         ui->googlePlayerButtons->speak(ui->googleTestSpeechEdit->text(), translator.sourceLanguage(), QOnlineTranslator::Google);
-    else
+        break;
+    case QOnlineTranslator::Bing:
+        ui->bingPlayerButtons->speak(ui->bingTestSpeechEdit->text(), translator.sourceLanguage(), QOnlineTranslator::Bing);
+        break;
+    default:
         Q_UNREACHABLE();
+    }
 }

@@ -58,6 +58,12 @@ public:
     QMap<QOnlineTranslator::Language, QLocale::Country> regions(QOnlineTranslator::Engine engine) const;
     void setRegions(QOnlineTranslator::Engine engine, QMap<QOnlineTranslator::Language, QLocale::Country> regions);
 
+    // Per-language Bing voice name preferences (e.g. "en-US-AriaNeural"), keyed the same way as
+    // regions() above but independent of it - Bing is selected by an explicit voice name rather
+    // than a region, since a single locale can offer several differently-named voices.
+    QMap<QOnlineTranslator::Language, QString> bingVoicePreferences() const;
+    void setBingVoicePreferences(QMap<QOnlineTranslator::Language, QString> voicePreferences);
+
     void speak(const QString &text, QOnlineTranslator::Language lang, QOnlineTranslator::Engine engine);
     void pauseSpeaking();
     void playPauseSpeaking();
@@ -80,9 +86,17 @@ private:
 
     Ui::SpeakButtons *ui;
     QMediaPlayer *m_mediaPlayer = nullptr;
+
+    // Kept as a persistent member (rather than a local variable created fresh in speak()) because
+    // Bing's TTS audio lives in temporary files owned by this object - see the m_bingAudioFiles
+    // comment in qonlinetts.h. A new instance per call would have its files deleted before
+    // QMediaPlayer got a chance to play them.
+    QOnlineTts m_onlineTts;
+
     QOnlineTts::Voice m_yandexVoice = QOnlineTts::NoVoice;
     QOnlineTts::Emotion m_yandexEmotion = QOnlineTts::NoEmotion;
     QMap<QOnlineTranslator::Language, QLocale::Country> m_googleRegions;
+    QMap<QOnlineTranslator::Language, QString> m_bingVoicePreferences;
 };
 
 #endif // PLAYERBUTTONS_H

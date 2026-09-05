@@ -231,6 +231,13 @@ public:
     void setRegions(QOnlineTranslator::Engine engine, const QMap<QOnlineTranslator::Language, QLocale::Country> &regions);
     static QMap<QOnlineTranslator::Language, QLocale::Country> defaultRegions(QOnlineTranslator::Engine engine);
 
+    // Per-language Bing voice name preferences (e.g. "en-US-AriaNeural"), as picked in the
+    // settings dialog's language -> region -> gender -> voice hierarchy. A language with no entry
+    // falls back to BingVoiceCatalog::defaultVoiceName() at speak time.
+    QMap<QOnlineTranslator::Language, QString> bingVoicePreferences() const;
+    void setBingVoicePreferences(const QMap<QOnlineTranslator::Language, QString> &voicePreferences);
+    static QMap<QOnlineTranslator::Language, QString> defaultBingVoicePreferences();
+
     // Engine used to actually play speech, independent of the translation engine
     // (e.g. translate with DeepLX/DeepLXFree, but speak with Google or Yandex).
     QOnlineTranslator::Engine ttsEngine() const;
