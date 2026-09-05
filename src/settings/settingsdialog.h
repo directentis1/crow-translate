@@ -82,6 +82,13 @@ private slots:
     void detectGoogleTextLanguage();
     void speakGoogleTestText();
 
+    void onBingLanguageSelectionChanged(int languageIndex);
+    void onBingCountrySelectionChanged(int countryIndex);
+    void onBingGenderSelectionChanged(int genderIndex);
+    void saveBingEngineVoice(int voiceIndex);
+    void detectBingTextLanguage();
+    void speakBingTestText();
+
     void onDeeplLanguageSelectionChanged(int languageIndex);
     void saveDeeplEngineRegion(int region);
 
@@ -106,6 +113,12 @@ private:
     void detectTestTextLanguage(QOnlineTranslator &translator, QOnlineTranslator::Engine engine);
     void speakTestText(QOnlineTranslator &translator, QOnlineTranslator::Engine engine);
 
+    // Bing speech-synthesis helpers
+    void populateBingLanguageComboBox();
+    int ensureBingLanguageComboBoxItem(QOnlineTranslator::Language lang);
+    void loadBingVoicePreference(QOnlineTranslator::Language lang);
+    QOnlineTranslator::Language pickOtherBingLanguage();
+
     Ui::SettingsDialog *ui;
 
     // Manage platform-dependant autostart
@@ -114,6 +127,17 @@ private:
     // Test voice
     QOnlineTranslator *m_yandexTranslator;
     QOnlineTranslator *m_googleTranslator;
+    QOnlineTranslator *m_bingTranslator;
+
+    // Every Bing voice preference collected so far in this dialog session, keyed by language -
+    // like m_deeplRegions below, there's no persistent per-language widget to hold this live, so
+    // it's kept here and only pushed through the language/region/gender/voice comboboxes for
+    // editing. Saved to AppSettings wholesale in accept().
+    QMap<QOnlineTranslator::Language, QString> m_bingVoicePreferences;
+
+    // Index bingLanguageComboBox was on before the user opened it, so a cancelled "Other
+    // language..." picker can restore the previous selection instead of leaving the picker row selected.
+    int m_lastBingLanguageIndex = 0;
 
     // DeepLX/DeepLXFree regional variant preferences, keyed by generic language.
     // Unlike Google's TTS regions, there's no persistent widget to hold this live in the dialog,

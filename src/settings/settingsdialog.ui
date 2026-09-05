@@ -1456,6 +1456,122 @@
              </widget>
             </item>
             <item>
+             <widget class="QGroupBox" name="bingSpeechGroupBox">
+              <property name="title">
+               <string notr="true">Bing</string>
+              </property>
+              <layout class="QFormLayout" name="bingSpeechFormLayout">
+               <item row="0" column="0">
+                <widget class="QLabel" name="bingLanguageLabel">
+                 <property name="text">
+                  <string>Language:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="bingLanguageComboBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Language to configure a voice for. Populated with a few common languages by default - pick &amp;quot;Other language...&amp;quot; to search the full list Bing supports.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="bingRegionLabel">
+                 <property name="text">
+                  <string>Region:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QComboBox" name="bingCountryComboBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Regional/accent variant of the selected language&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="bingGenderLabel">
+                 <property name="text">
+                  <string>Gender:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QComboBox" name="bingGenderComboBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Voice gender for the selected region&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="bingVoiceLabel">
+                 <property name="text">
+                  <string>Voice:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QComboBox" name="bingVoiceComboBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specific neural voice to use&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="bingTestSpeechLabel">
+                 <property name="text">
+                  <string>Speech test:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <layout class="QHBoxLayout" name="bingTestSpeechLayout">
+                 <item>
+                  <widget class="QLineEdit" name="bingTestSpeechEdit">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Text to test speech&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="text">
+                    <string>This is an example of speech synthesis.</string>
+                   </property>
+                   <property name="placeholderText">
+                    <string>Test voice</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="SpeakButtons" name="bingPlayerButtons" native="true"/>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
              <spacer name="speechPageSpacer">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -2606,6 +2722,86 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>bingLanguageComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onBingLanguageSelectionChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>480</x>
+     <y>350</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>275</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>bingCountryComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onBingCountrySelectionChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>480</x>
+     <y>377</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>275</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>bingGenderComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onBingGenderSelectionChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>480</x>
+     <y>404</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>275</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>bingVoiceComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>saveBingEngineVoice(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>480</x>
+     <y>431</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>275</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>bingPlayerButtons</sender>
+   <signal>playerMediaRequested()</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>detectBingTextLanguage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>808</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>275</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onProxyTypeChanged(int)</slot>
@@ -2633,5 +2829,10 @@
   <slot>detectGoogleTextLanguage()</slot>
   <slot>onDeeplLanguageSelectionChanged(int)</slot>
   <slot>saveDeeplEngineRegion(int)</slot>
+  <slot>onBingLanguageSelectionChanged(int)</slot>
+  <slot>onBingCountrySelectionChanged(int)</slot>
+  <slot>onBingGenderSelectionChanged(int)</slot>
+  <slot>saveBingEngineVoice(int)</slot>
+  <slot>detectBingTextLanguage()</slot>
  </slots>
 </ui>
