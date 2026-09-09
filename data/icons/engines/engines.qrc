@@ -5,6 +5,7 @@
         <file>bing.svg</file>
         <file>libretranslate.svg</file>
         <file>lingva.svg</file>
-	<file>deeplx.svg</file>
+        <file>deeplx.svg</file>
+        <file>edge.svg</file>
     </qresource>
 </RCC>

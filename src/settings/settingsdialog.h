@@ -119,6 +119,11 @@ private:
     void loadBingVoicePreference(QOnlineTranslator::Language lang);
     QOnlineTranslator::Language pickOtherBingLanguage();
 
+    // Bing and Edge share one voice catalog and one settings group box; this picks which of the
+    // two the group box's "Speech test" button should actually exercise - whichever is currently
+    // the app's active TTS engine, defaulting to Bing otherwise.
+    QOnlineTranslator::Engine catalogTestEngine() const;
+
     Ui::SettingsDialog *ui;
 
     // Manage platform-dependant autostart

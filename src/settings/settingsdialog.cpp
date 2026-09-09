@@ -85,7 +85,7 @@ SettingsDialog::SettingsDialog(MainWindow *parent)
 
     // Speech engine: independent of the translation engine, so e.g. DeepLX/DeepLXFree can be
     // used to translate while any TTS-capable engine is used to actually speak the result.
-    for (int i = 0; i <= QOnlineTranslator::DeepLXFree; ++i) {
+    for (int i = 0; i <= QOnlineTranslator::Edge; ++i) {
         const auto engine = static_cast<QOnlineTranslator::Engine>(i);
         if (!QOnlineTts::isSupportTts(engine))
             continue;
@@ -100,6 +100,9 @@ SettingsDialog::SettingsDialog(MainWindow *parent)
             break;
         case QOnlineTranslator::Bing:
             iconFile = QStringLiteral(":/icons/engines/bing.svg");
+            break;
+        case QOnlineTranslator::Edge:
+            iconFile = QStringLiteral(":/icons/engines/edge.svg");
             break;
         default:
             break;
@@ -382,7 +385,7 @@ void SettingsDialog::onSpeechEngineChanged(int index)
 
     ui->yandexSpeechGroupBox->setStyleSheet(engine == QOnlineTranslator::Yandex ? QStringLiteral("QGroupBox::title { font-weight: bold; }") : QString());
     ui->googleSpeechGroupBox->setStyleSheet(engine == QOnlineTranslator::Google ? QStringLiteral("QGroupBox::title { font-weight: bold; }") : QString());
-    ui->bingSpeechGroupBox->setStyleSheet(engine == QOnlineTranslator::Bing ? QStringLiteral("QGroupBox::title { font-weight: bold; }") : QString());
+    ui->bingSpeechGroupBox->setStyleSheet((engine == QOnlineTranslator::Bing || engine == QOnlineTranslator::Edge) ? QStringLiteral("QGroupBox::title { font-weight: bold; }") : QString());
 }
 
 // Disable (enable) "Custom icon path" option
@@ -690,12 +693,18 @@ void SettingsDialog::saveBingEngineVoice(int voiceIndex)
 
 void SettingsDialog::detectBingTextLanguage()
 {
-    detectTestTextLanguage(*m_bingTranslator, QOnlineTranslator::Bing);
+    detectTestTextLanguage(*m_bingTranslator, catalogTestEngine());
 }
 
 void SettingsDialog::speakBingTestText()
 {
-    speakTestText(*m_bingTranslator, QOnlineTranslator::Bing);
+    speakTestText(*m_bingTranslator, catalogTestEngine());
+}
+
+QOnlineTranslator::Engine SettingsDialog::catalogTestEngine() const
+{
+    const auto engine = ui->speechEngineComboBox->currentData().value<QOnlineTranslator::Engine>();
+    return engine == QOnlineTranslator::Edge ? QOnlineTranslator::Edge : QOnlineTranslator::Bing;
 }
 
 void SettingsDialog::onDeeplLanguageSelectionChanged(int languageIndex)
@@ -1040,6 +1049,7 @@ void SettingsDialog::detectTestTextLanguage(QOnlineTranslator &translator, QOnli
         testText = ui->googleTestSpeechEdit->text();
         break;
     case QOnlineTranslator::Bing:
+    case QOnlineTranslator::Edge:
         testText = ui->bingTestSpeechEdit->text();
         break;
     default:
@@ -1069,7 +1079,8 @@ void SettingsDialog::speakTestText(QOnlineTranslator &translator, QOnlineTransla
         ui->googlePlayerButtons->speak(ui->googleTestSpeechEdit->text(), translator.sourceLanguage(), QOnlineTranslator::Google);
         break;
     case QOnlineTranslator::Bing:
-        ui->bingPlayerButtons->speak(ui->bingTestSpeechEdit->text(), translator.sourceLanguage(), QOnlineTranslator::Bing);
+    case QOnlineTranslator::Edge:
+        ui->bingPlayerButtons->speak(ui->bingTestSpeechEdit->text(), translator.sourceLanguage(), engine); // was hardcoded QOnlineTranslator::Bing
         break;
     default:
         Q_UNREACHABLE();
