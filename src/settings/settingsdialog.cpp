@@ -693,7 +693,7 @@ void SettingsDialog::saveBingEngineVoice(int voiceIndex)
 
 void SettingsDialog::detectBingTextLanguage()
 {
-    detectTestTextLanguage(*m_bingTranslator, catalogTestEngine());
+    detectTestTextLanguage(*m_bingTranslator, QOnlineTranslator::Bing);
 }
 
 void SettingsDialog::speakBingTestText()
