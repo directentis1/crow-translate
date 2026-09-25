@@ -320,6 +320,9 @@ void SettingsDialog::accept()
     settings.setEmotion(QOnlineTranslator::Yandex, ui->yandexPlayerButtons->emotion(QOnlineTranslator::Yandex));
     settings.setRegions(QOnlineTranslator::Google, ui->googlePlayerButtons->regions(QOnlineTranslator::Google));
     settings.setBingVoicePreferences(m_bingVoicePreferences);
+    settings.setBingProsodyRate(ui->bingRateSpinBox->value());
+    settings.setBingProsodyPitch(ui->bingPitchSpinBox->value());
+    settings.setBingProsodyVolume(ui->bingVolumeSpinBox->value());
     settings.setTtsEngine(ui->speechEngineComboBox->currentData().value<QOnlineTranslator::Engine>());
 
     // Connection settings
@@ -386,6 +389,11 @@ void SettingsDialog::onSpeechEngineChanged(int index)
     ui->yandexSpeechGroupBox->setStyleSheet(engine == QOnlineTranslator::Yandex ? QStringLiteral("QGroupBox::title { font-weight: bold; }") : QString());
     ui->googleSpeechGroupBox->setStyleSheet(engine == QOnlineTranslator::Google ? QStringLiteral("QGroupBox::title { font-weight: bold; }") : QString());
     ui->bingSpeechGroupBox->setStyleSheet((engine == QOnlineTranslator::Bing || engine == QOnlineTranslator::Edge) ? QStringLiteral("QGroupBox::title { font-weight: bold; }") : QString());
+
+    // Bing's SSML has no pitch/volume attributes - only rate applies there.
+    const bool pitchVolumeApplicable = engine == QOnlineTranslator::Edge;
+    ui->bingPitchSpinBox->setEnabled(pitchVolumeApplicable);
+    ui->bingVolumeSpinBox->setEnabled(pitchVolumeApplicable);
 }
 
 // Disable (enable) "Custom icon path" option
@@ -698,6 +706,7 @@ void SettingsDialog::detectBingTextLanguage()
 
 void SettingsDialog::speakBingTestText()
 {
+    ui->bingPlayerButtons->setProsody(ui->bingRateSpinBox->value(), ui->bingPitchSpinBox->value(), ui->bingVolumeSpinBox->value());
     speakTestText(*m_bingTranslator, catalogTestEngine());
 }
 
@@ -890,6 +899,9 @@ void SettingsDialog::restoreDefaults()
         m_lastBingLanguageIndex = 0;
         loadBingVoicePreference(ui->bingLanguageComboBox->currentData().value<QOnlineTranslator::Language>());
     }
+    ui->bingRateSpinBox->setValue(AppSettings::defaultBingProsodyRate());
+    ui->bingPitchSpinBox->setValue(AppSettings::defaultBingProsodyPitch());
+    ui->bingVolumeSpinBox->setValue(AppSettings::defaultBingProsodyVolume());
     ui->speechEngineComboBox->setCurrentIndex(ui->speechEngineComboBox->findData(AppSettings::defaultTtsEngine()));
     onSpeechEngineChanged(ui->speechEngineComboBox->currentIndex());
 
@@ -1017,6 +1029,9 @@ void SettingsDialog::loadSettings()
         m_lastBingLanguageIndex = 0;
         loadBingVoicePreference(ui->bingLanguageComboBox->currentData().value<QOnlineTranslator::Language>());
     }
+    ui->bingRateSpinBox->setValue(settings.bingProsodyRate());
+    ui->bingPitchSpinBox->setValue(settings.bingProsodyPitch());
+    ui->bingVolumeSpinBox->setValue(settings.bingProsodyVolume());
     ui->speechEngineComboBox->setCurrentIndex(ui->speechEngineComboBox->findData(settings.ttsEngine()));
     onSpeechEngineChanged(ui->speechEngineComboBox->currentIndex());
 

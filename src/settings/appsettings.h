@@ -238,6 +238,21 @@ public:
     void setBingVoicePreferences(const QMap<QOnlineTranslator::Language, QString> &voicePreferences);
     static QMap<QOnlineTranslator::Language, QString> defaultBingVoicePreferences();
 
+    // Rate is used by both Bing and Edge SSML; pitch/volume are Edge-only (Bing's SSML has no
+    // attributes for them). All three are one shared control row in the settings dialog, not
+    // per-language, same as bingVoicePreferences() above.
+    int bingProsodyRate() const;
+    void setBingProsodyRate(int ratePercent);
+    static int defaultBingProsodyRate();
+
+    int bingProsodyPitch() const;
+    void setBingProsodyPitch(int pitchHz);
+    static int defaultBingProsodyPitch();
+
+    int bingProsodyVolume() const;
+    void setBingProsodyVolume(int volumePercent);
+    static int defaultBingProsodyVolume();
+
     // Engine used to actually play speech, independent of the translation engine
     // (e.g. translate with DeepLX/DeepLXFree, but speak with Google or Yandex).
     QOnlineTranslator::Engine ttsEngine() const;

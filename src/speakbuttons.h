@@ -64,6 +64,15 @@ public:
     QMap<QOnlineTranslator::Language, QString> bingVoicePreferences() const;
     void setBingVoicePreferences(QMap<QOnlineTranslator::Language, QString> voicePreferences);
 
+    int prosodyRate() const;
+    int prosodyPitch() const;
+    int prosodyVolume() const;
+    void setProsody(int ratePercent, int pitchHz, int volumePercent);
+
+    int m_prosodyRatePercent = 0;
+    int m_prosodyPitchHz = 0;
+    int m_prosodyVolumePercent = 0;
+
     void speak(const QString &text, QOnlineTranslator::Language lang, QOnlineTranslator::Engine engine);
     void pauseSpeaking();
     void playPauseSpeaking();

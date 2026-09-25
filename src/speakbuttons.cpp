@@ -154,6 +154,28 @@ void SpeakButtons::setBingVoicePreferences(QMap<QOnlineTranslator::Language, QSt
     m_bingVoicePreferences = std::move(voicePreferences);
 }
 
+int SpeakButtons::prosodyRate() const
+{
+    return m_prosodyRatePercent;
+}
+
+int SpeakButtons::prosodyPitch() const
+{
+    return m_prosodyPitchHz;
+}
+
+int SpeakButtons::prosodyVolume() const
+{
+    return m_prosodyVolumePercent;
+}
+
+void SpeakButtons::setProsody(int ratePercent, int pitchHz, int volumePercent)
+{
+    m_prosodyRatePercent = ratePercent;
+    m_prosodyPitchHz = pitchHz;
+    m_prosodyVolumePercent = volumePercent;
+}
+
 void SpeakButtons::speak(const QString &text, QOnlineTranslator::Language lang, QOnlineTranslator::Engine engine)
 {
     if (text.isEmpty()) {
@@ -163,6 +185,7 @@ void SpeakButtons::speak(const QString &text, QOnlineTranslator::Language lang, 
 
     m_onlineTts.setRegions(m_googleRegions);
     m_onlineTts.setBingVoicePreferences(m_bingVoicePreferences);
+    m_onlineTts.setProsody(m_prosodyRatePercent, m_prosodyPitchHz, m_prosodyVolumePercent);
 
     m_onlineTts.generateUrls(text, engine, lang, voice(engine), emotion(engine));
     if (m_onlineTts.error() != QOnlineTts::NoError) {

@@ -806,6 +806,51 @@ QMap<QOnlineTranslator::Language, QString> AppSettings::defaultBingVoicePreferen
     return {};
 }
 
+int AppSettings::bingProsodyRate() const
+{
+    return m_settings->value(QStringLiteral("TTS/BingProsodyRate"), defaultBingProsodyRate()).toInt();
+}
+
+void AppSettings::setBingProsodyRate(int ratePercent)
+{
+    m_settings->setValue(QStringLiteral("TTS/BingProsodyRate"), ratePercent);
+}
+
+int AppSettings::defaultBingProsodyRate()
+{
+    return 0;
+}
+
+int AppSettings::bingProsodyPitch() const
+{
+    return m_settings->value(QStringLiteral("TTS/BingProsodyPitch"), defaultBingProsodyPitch()).toInt();
+}
+
+void AppSettings::setBingProsodyPitch(int pitchHz)
+{
+    m_settings->setValue(QStringLiteral("TTS/BingProsodyPitch"), pitchHz);
+}
+
+int AppSettings::defaultBingProsodyPitch()
+{
+    return 0;
+}
+
+int AppSettings::bingProsodyVolume() const
+{
+    return m_settings->value(QStringLiteral("TTS/BingProsodyVolume"), defaultBingProsodyVolume()).toInt();
+}
+
+void AppSettings::setBingProsodyVolume(int volumePercent)
+{
+    m_settings->setValue(QStringLiteral("TTS/BingProsodyVolume"), volumePercent);
+}
+
+int AppSettings::defaultBingProsodyVolume()
+{
+    return 0;
+}
+
 QOnlineTranslator::Engine AppSettings::ttsEngine() const
 {
     const auto engine = m_settings->value(QStringLiteral("Speech/Engine"), defaultTtsEngine()).value<QOnlineTranslator::Engine>();

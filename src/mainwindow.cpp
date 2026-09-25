@@ -1207,14 +1207,17 @@ void MainWindow::loadAppSettings()
     ui->sourceSpeakButtons->setEmotion(QOnlineTranslator::Yandex, settings.emotion(QOnlineTranslator::Yandex));
     ui->sourceSpeakButtons->setRegions(QOnlineTranslator::Google, settings.regions(QOnlineTranslator::Google));
     ui->sourceSpeakButtons->setBingVoicePreferences(settings.bingVoicePreferences());
+    ui->sourceSpeakButtons->setProsody(settings.bingProsodyRate(), settings.bingProsodyPitch(), settings.bingProsodyVolume());
     ui->translationSpeakButtons->setVoice(QOnlineTranslator::Yandex, settings.voice(QOnlineTranslator::Yandex));
     ui->translationSpeakButtons->setEmotion(QOnlineTranslator::Yandex, settings.emotion(QOnlineTranslator::Yandex));
     ui->translationSpeakButtons->setRegions(QOnlineTranslator::Google, settings.regions(QOnlineTranslator::Google));
     ui->translationSpeakButtons->setBingVoicePreferences(settings.bingVoicePreferences());
+    ui->translationSpeakButtons->setProsody(settings.bingProsodyRate(), settings.bingProsodyPitch(), settings.bingProsodyVolume());
     ui->reverseSpeakButtons->setVoice(QOnlineTranslator::Yandex, settings.voice(QOnlineTranslator::Yandex));
     ui->reverseSpeakButtons->setEmotion(QOnlineTranslator::Yandex, settings.emotion(QOnlineTranslator::Yandex));
     ui->reverseSpeakButtons->setRegions(QOnlineTranslator::Google, settings.regions(QOnlineTranslator::Google));
     ui->reverseSpeakButtons->setBingVoicePreferences(settings.bingVoicePreferences());
+    ui->reverseSpeakButtons->setProsody(settings.bingProsodyRate(), settings.bingProsodyPitch(), settings.bingProsodyVolume());
 
     // Connection
     if (const QNetworkProxy::ProxyType proxyType = settings.proxyType(); proxyType == QNetworkProxy::DefaultProxy) {
